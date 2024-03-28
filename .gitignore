@@ -1,0 +1,11 @@
+# File types
+*~
+*.org
+
+# Directories
+docs/
+img/
+old/
+data/old/
+data/sims/
+tex/
