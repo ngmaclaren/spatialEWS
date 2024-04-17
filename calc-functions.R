@@ -22,8 +22,8 @@ local_moran <- function(i, x, A) {
     (x[i]/m2)*sum(A[i, ]*x)
 }
 
-check_zerocrossing <- function() {}
-q1 <- function() {}
+## check_zerocrossing <- function() {}
+## q1 <- function() {}
 
-check_magnitude <- function() {}
-q2 <- function() {}
+## check_magnitude <- function() {}
+## q2 <- function() {}
