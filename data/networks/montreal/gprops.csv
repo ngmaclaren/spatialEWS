@@ -1,0 +1,6 @@
+# prop_name, value
+name,montreal
+description,"Network representing relationships between gangs, obtained from Montreal Police’s central intelligence database, spanning 2004 to 2007. Nodes are gangs, and an edge represents some kind of relationship between two gangs (as elicited from interviews with gang members)."
+citation,"['K. Descormiers, and C. Morselli, \"Alliances, conflicts, and contradictions in Montreal’s street gang landscape.\" International Criminal Justice Review 21(3), 297-314 (2011), http://journals.sagepub.com/doi/abs/10.1177/1057567711418501']"
+url,https://sites.google.com/site/ucinetsoftware/datasets/covert-networks/montrealstreetgangs
+tags,"['Social', 'Affiliation', 'Unweighted']"
