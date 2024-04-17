@@ -5,7 +5,6 @@
 # Directories
 docs/
 img/
-old/
-data/old/
+*/old/
 data/sims/
 tex/
