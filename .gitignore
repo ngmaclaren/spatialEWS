@@ -2,6 +2,9 @@
 *~
 *.org
 
+# Specific files
+fromUBcluster-spatialEWS.txt
+
 # Directories
 docs/
 img/
