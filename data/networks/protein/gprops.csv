@@ -1,0 +1,93 @@
+# prop_name, value
+name,interactome_pdz
+description,"A network of PDZ-domain-mediated protein–protein binding interactions, extracted from the PDZBase database. Nodes represent proteins and an edge represents a binding interaction between two proteins."
+citation,"['T. Beuming et al. \"PDZBase: a protein–protein interaction database for PDZ-domains.\" Bioinformatics 21.6, 827-828. (2005)., http://bioinformatics.oxfordjournals.org/content/21/6/827.short']"
+url,http://konect.cc/networks/maayan-pdzbase
+tags,"['Biological', 'Protein interactions', 'Unweighted']"
+konect_meta,"name:  PDZBase
+code:  MP
+url:   http://research.mssm.edu/maayan/datasets/qualitative_networks.shtml
+category:  Metabolic 
+description:  Protein–protein interactions
+cite:  konect:pdzbase
+long-description:  This is a network of protein–protein interactions from PDZBase. 
+entity-names:  protein
+relationship-names:  interaction
+extr:  maayan
+tags:  #loop 
+"
+konect_readme,"PDZBase network, part of the Koblenz Network Collection
+===========================================================================
+
+This directory contains the TSV and related files of the maayan-pdzbase network: This is a network of protein–protein interactions from PDZBase. 
+
+
+More information about the network is provided here: 
+http://konect.cc/networks/maayan-pdzbase
+
+Files: 
+    meta.maayan-pdzbase -- Metadata about the network 
+    out.maayan-pdzbase -- The adjacency matrix of the network in whitespace-separated values format, with one edge per line
+      The meaning of the columns in out.maayan-pdzbase are: 
+        First column: ID of from node 
+        Second column: ID of to node
+        Third column (if present): weight or multiplicity of edge
+        Fourth column (if present):  timestamp of edges Unix time
+
+
+Use the following References for citation:
+
+@MISC{konect:2017:maayan-pdzbase,
+    title = {PDZBase network dataset -- {KONECT}},
+    month = oct,
+    year = {2017},
+    url = {http://konect.cc/networks/maayan-pdzbase}
+}
+
+@article{konect:pdzbase,
+	title={{PDZBase}: A Protein--Protein Interaction Database For {PDZ}-Domains},
+	author = {Beuming, Thijs and Skrabanek, Lucy and Niv, Masha Y. and Mukherjee, Piali and Weinstein, Harel},
+	journal={Bioinformatics},
+	volume={21},
+	number={6},
+	pages={827--828},
+	year={2005},
+}
+
+@article{konect:pdzbase,
+	title={{PDZBase}: A Protein--Protein Interaction Database For {PDZ}-Domains},
+	author = {Beuming, Thijs and Skrabanek, Lucy and Niv, Masha Y. and Mukherjee, Piali and Weinstein, Harel},
+	journal={Bioinformatics},
+	volume={21},
+	number={6},
+	pages={827--828},
+	year={2005},
+}
+
+
+@inproceedings{konect,
+	title = {{KONECT} -- {The} {Koblenz} {Network} {Collection}},
+	author = {Jérôme Kunegis},
+	year = {2013},
+	booktitle = {Proc. Int. Conf. on World Wide Web Companion},
+	pages = {1343--1350},
+	url = {http://dl.acm.org/citation.cfm?id=2488173},
+	url_presentation = {https://www.slideshare.net/kunegis/presentationwow},
+	url_web = {http://konect.cc/},
+	url_citations = {https://scholar.google.com/scholar?cites=7174338004474749050},
+}
+
+@inproceedings{konect,
+	title = {{KONECT} -- {The} {Koblenz} {Network} {Collection}},
+	author = {Jérôme Kunegis},
+	year = {2013},
+	booktitle = {Proc. Int. Conf. on World Wide Web Companion},
+	pages = {1343--1350},
+	url = {http://dl.acm.org/citation.cfm?id=2488173},
+	url_presentation = {https://www.slideshare.net/kunegis/presentationwow},
+	url_web = {http://konect.cc/},
+	url_citations = {https://scholar.google.com/scholar?cites=7174338004474749050},
+}
+
+
+"

@@ -1,6 +1,6 @@
 library(igraph)
 
-dirs <- c("adjnoun", "dolphin", "montreal", "students")
+dirs <- c("adjnoun", "dolphin", "montreal", "students", "protein")
 
 gather_network <- function(dir) {
     el <- read.csv(paste0("./", dir, "/edges.csv"))
