@@ -17,7 +17,7 @@ option_list <- list(
         help = "Default is %default. Available: ode or sde."
     ),
     make_option(
-        c("-t", "--simtime"), type = "integer", default = 10,
+        c("-t", "--simtime"), type = "integer", default = 50,
         help = "Default is %default. Length of simulation in user time units (not Δt)."
     ),
     make_option(
@@ -54,11 +54,11 @@ args <- parse_args(
 
                                         # For debugging
 if(interactive()) {
-    args$network <- "dolphin"
-    args$model <- "doublewell"
+    args$network <- "adjnoun"
+    args$model <- "genereg"
     args$bparam <- "u"
     args$direction <- "down"
-    ##args$uinit <- -5
+    ## args$uinit <- -5
 }
 
 library(parallel)
@@ -117,7 +117,7 @@ if(interactive()) { # system.time() won't print to stdout like this---run each l
     system.time(result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind))
     rowMeans(result)
     ## result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind)
-    pdf(paste0("./img/", filetag, "-bifplot.pdf"))
+    pdf(paste0(filetag, "-bifplot.pdf"))
     bifplot(result, rng, col = 1)
     abline(h = 0, col = 2)
     dev.off()

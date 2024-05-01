@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# debugging
+# models=("doublewell")
+# networks=("dolphin")
+# bparams=("D")
+# directions=("up")
+
 # lists of conditions
 models=("doublewell" "mutualistic" "genereg" "SIS")
 networks=(`cat ./data/networknames.txt`)
@@ -42,10 +48,10 @@ for network in ${networks[@]}; do
 
 		# jobname=$(printf "sim-%03d" "${counter}")
 		jobname=${network}-${model}-${bparam}-${direction}
-		echo ${jobname}
-		echo ${counter}
+		# echo ${jobname}
+		# echo ${counter}
 
-		# sbatch --job-name=${jobname} --output=./outfiles/${jobname}.out request-simulation.sh ${model} ${network} ${bparam} ${direction} ${uinit} ${ntrials}
+		sbatch --job-name=${jobname} --output=./outfiles/${jobname}.out request-simulation.sh ${model} ${network} ${bparam} ${direction} ${uinit} ${ntrials}
 
 		((counter++))
 	    done
