@@ -1,3 +1,5 @@
+## In this version, set better parameters using a table stored separately
+
 library(optparse)
 option_list <- list(
     make_option(
@@ -55,7 +57,7 @@ args <- parse_args(
                                         # For debugging
 if(interactive()) {
     args$network <- "adjnoun"
-    args$model <- "genereg"
+    args$model <- "doublewell"
     args$bparam <- "u"
     args$direction <- "down"
     ## args$uinit <- -5
@@ -82,9 +84,21 @@ A <- as_adj(g, "both", sparse = FALSE)
 N <- vcount(g)
 
 deltaT <- 0.01
+lmax <- 100
 
 model <- get(args$model)
 modelparams <- get(paste0(".", args$model))
+
+                                        # Set params from the separate file here
+refparams <- read.csv("./data/cparam-values.csv")
+rowfilter <- refparams$model == args$model & refparams$cparam == args$bparam & refparams$direction == args$direction
+farlim <- refparams$farlim[rowfilter]
+biflim <- refparams$biflim[rowfilter]
+if(args$bparam == "D") {
+    modelparams$Ds <- seq(farlim, biflim, length.out = lmax)
+} else {
+    modelparams$us <- seq(farlim, biflim, length.out = lmax)
+}
 
                                         # The initial x value often has a value that makes sense.
                                         # That value is stored in the standard parameter list.
@@ -108,7 +122,8 @@ rng <- switch(
     args$bparam,
     ## D = switch(args$direction, up = modelparams$Ds.up, down = modelparams$Ds.down),
     D = params$Ds,
-    u = switch(args$direction, up = modelparams$us.up, down = modelparams$us.down)
+    ## u = switch(args$direction, up = modelparams$us.up, down = modelparams$us.down)
+    u = params$us    
 )
 
                                         # Debugging
