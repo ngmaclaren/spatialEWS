@@ -1,7 +1,3 @@
-## Working on classify().
-## Is it basically working? I think so, but need to figure out to check further.
-## Certainly the parameters, multiple and theta, must be bad. Musn't they?
-
 library(igraph)
 library(localsolver)
 source("calc-functions.R")
@@ -20,23 +16,15 @@ directions <- sapply(simdata, attr, "direction")
 cparam.vals <- lapply(simdata, attr, "bparam.vals")
 As <- lapply(simdata, function(dat) attr(dat, "params")$A)
 
-## Continue here instead ##
 dfs <- lapply(
     simdata,
     function(sim) {
         attribs <- attributes(sim)
         df <- sim[[1]]
-                                        #
-        ## if(attribs$direction == "down") {
-        ##     df <- df[rev(seq(nrow(df))), ]
-        ##     attribs$bparam.vals <- rev(attribs$bparam.vals)
-        ## }
-                                        #
         attributes(df) <- c(attributes(df), attribs)
         df
     }
 )
-
 
 dfnames <- mapply(
     function(dyn, net, bp, dir) paste(dyn, net, bp, dir, sep = "-"),
@@ -44,6 +32,9 @@ dfnames <- mapply(
     USE.NAMES = FALSE
 )
 names(dfs) <- dfnames
+
+conds <- as.data.frame(cbind(dyns, bparams, directions, nets))
+plotorder <- with(conds, order(dyns, bparams, directions, nets))
 
 u.down <- which(grepl("-u-", dfnames, fixed = TRUE) & grepl("-down", dfnames, fixed = TRUE))
 u.up <- which(grepl("-u-", dfnames, fixed = TRUE) & grepl("-up", dfnames, fixed = TRUE))
@@ -54,7 +45,7 @@ moranIs<- mapply(
     function(df, A) apply(df, 1, global_moran, A = A),
     dfs, As, SIMPLIFY = FALSE, USE.NAMES = TRUE
 )
-cssds <- lapply(dfs, function(df) apply(df, 1, sd))
+ssds <- lapply(dfs, function(df) apply(df, 1, sd))
 
 basins <- list( ## GLOBAL
     doublewell = 3,
@@ -76,46 +67,25 @@ get_idx <- function(df) {
     )
 }
 
-get_samples <- function(df, which = c("near", "far"), n = 5) {
-    direction <- attr(df, "direction")
+get_samples <- function(df, which = c("near", "far"), n = 3) {
     whichslope <- match.arg(which)
 
     idx <- get_idx(df)
 
     switch(
-        direction,
-        up = switch(whichslope, far = idx[1:n], near = rev(idx[seq(length(idx), by = -1, length.out = n)])),
-        down = switch(whichslope, near = idx[1:n], far = rev(idx[seq(length(idx), by = -1, length.out = n)]))
+        whichslope,
+        near = rev(seq(length(idx), by = -1, length.out = n)),
+        far = seq(1, by = 1, length.out = n)
     )
 }
 
-## get_quadratic_fit <- function(EWS, cparam.vals, direction) {}
+get_slope <- function(df, EWS, which = c("near", "far"), n = 3, return.model = FALSE) {
+    whichslope <- match.arg(which)
 
-get_first_slope <- function(df, EWS, return.model = FALSE) { # compute the EWS ahead of time? Yes.
-    direction <- attr(df, "direction")
-    
-    samples <- get_samples(df, "far") # expose n?
+    samples <- get_samples(df, whichslope, n)
 
     cparam <- attr(df, "bparam.vals")[samples]
     ews <- EWS[samples]
-
-    m <- lm(ews ~ cparam)
-    
-    if(return.model) {
-        return(m)
-    } else {
-        return(as.numeric(coef(m)[2]))
-    }
-}
-    
-get_second_slope <- function(df, EWS, return.model = FALSE) { # compute the EWS ahead of time? Yes.
-    direction <- attr(df, "direction")
-    
-    samples <- get_samples(df, "near") # expose n?
-
-    cparam <- attr(df, "bparam.vals")[samples]
-    ews <- EWS[samples]
-
     m <- lm(ews ~ cparam)
 
     if(return.model) {
@@ -125,92 +95,19 @@ get_second_slope <- function(df, EWS, return.model = FALSE) { # compute the EWS 
     }
 }
 
-get_quadratic_fit <- function(df, EWS) {
-                                        # I think this function will be no good: it imposes too many assumptions
-                                        # on the data.
-                                        # If used, negative quad term means arms of parabola point down
-    idx <- get_idx(df)
-
-    cparam <- attr(df, "bparam.vals")[idx]
-    ews <- EWS[idx]
-
-    fit <- lm(ews ~ poly(cparam, 2))
-    return(fit)
-}
-
-dev.new(height = 10, width = 10)
-par(mfrow = c(2, 2))
-plot(
-    mapply(get_first_slope, dfs, cssds)[D.up], mapply(get_second_slope, dfs, cssds)[D.up],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "D up"
-)
-mtext("Cross-sectional standard deviation", adj = 1, line = 3, cex = 1, font = 2)
-plot(
-    mapply(get_first_slope, dfs, cssds)[D.down], mapply(get_second_slope, dfs, cssds)[D.down],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "D down"
-)
-plot(
-    mapply(get_first_slope, dfs, cssds)[u.up], mapply(get_second_slope, dfs, cssds)[u.up],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "u up"
-)
-plot(
-    mapply(get_first_slope, dfs, cssds)[u.down], mapply(get_second_slope, dfs, cssds)[u.down],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "u down"
+                                        # test
+slopes <- data.frame(
+    ssd.far = mapply(get_slope, dfs, ssds, which = "far", n = 3),
+    ssd.near = mapply(get_slope, dfs, ssds, which = "near", n = 3),
+    moran.far = mapply(get_slope, dfs, moranIs, which = "far", n = 3),
+    moran.near = mapply(get_slope, dfs, moranIs, which = "near", n = 3)
 )
 
-dev.new(height = 10, width = 10)
-par(mfrow = c(2, 2))
-plot(
-    mapply(get_first_slope, dfs, moranIs)[D.up], mapply(get_second_slope, dfs, moranIs)[D.up],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "D up"
-)
-mtext("Moran's I", adj = 1, line = 3, cex = 1, font = 2)
-plot(
-    mapply(get_first_slope, dfs, moranIs)[D.down], mapply(get_second_slope, dfs, moranIs)[D.down],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "D down"
-)
-plot(
-    mapply(get_first_slope, dfs, moranIs)[u.up], mapply(get_second_slope, dfs, moranIs)[u.up],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "u up"
-)
-plot(
-    mapply(get_first_slope, dfs, moranIs)[u.down], mapply(get_second_slope, dfs, moranIs)[u.down],
-    xlab = "Far from the bifurcation", ylab = "Near the bifurcation",
-    cex = 1.5, pch = 16, cex.axis = 1.5, cex.lab = 1.5, main = "u down"
-)
-
-f.slope <- data.frame(
-    cssd = mapply(get_first_slope, dfs, cssds),
-    moranI = mapply(get_first_slope, dfs, moranIs),
-    dynamics = dyns,
-    network = nets,
-    bparam = bparams,
-    direction = directions,
-    slope = "first"
-)
-s.slope <- data.frame(
-    cssd = mapply(get_second_slope, dfs, cssds),
-    moranI = mapply(get_second_slope, dfs, moranIs),
-    dynamics = dyns,
-    network = nets,
-    bparam = bparams,
-    direction = directions,
-    slope = "second"
-)
-slopes <- rbind(f.slope, s.slope)
-hist(slopes$cssd[slopes$slope == "second"])
-
-
-classify <- function(df, EWS, multiple = 5, threshold = 5) {
-    firstslope <- get_first_slope(df, EWS)
-    secondslope <- get_second_slope(df, EWS)
+                                        # I think we don't want an absolute value threshold: no way to know in
+                                        # advance what scale the slope differences will be on.
+classify <- function(df, EWS, multiple = 2) {#, threshold = 2) {
+    firstslope <- get_slope(df, EWS, "far")
+    secondslope <- get_slope(df, EWS, "near")
 
     firstsign <- sign(firstslope)
     secondsign <- sign(secondslope)
@@ -219,17 +116,17 @@ classify <- function(df, EWS, multiple = 5, threshold = 5) {
     direction <- attr(df, "direction")
 
     if(direction == "up") {
-        if(sign(firstslope) > 0 & sign(secondslope) > 0 & abs(mult) > multiple & secondslope > threshold) {
+        if(sign(firstslope) > 0 & sign(secondslope) > 0 & abs(mult) > multiple) {# & secondslope > threshold) {
             return("consistent")
-        } else if(sign(firstslope) < 0 & sign(secondslope) > 0 & abs(mult) > multiple & secondslope > threshold) {
+        } else if(sign(firstslope) < 0 & sign(secondslope) > 0 & abs(mult) > multiple) {# & secondslope > threshold) {
             return("signswitch")
         } else {
             return("bad")
         }
     } else { # down
-        if(sign(firstslope) < 0 & sign(secondslope) < 0 & abs(mult) > multiple & secondslope > threshold) {
+        if(sign(firstslope) < 0 & sign(secondslope) < 0 & abs(mult) > multiple) {# & secondslope > threshold) {
             return("consistent")
-        } else if(sign(firstslope) > 0 & sign(secondslope) < 0 & abs(mult) > multiple & secondslope > threshold) {
+        } else if(sign(firstslope) > 0 & sign(secondslope) < 0 & abs(mult) > 0.5*multiple) {# & secondslope > threshold) {
             return("signswitch")
         } else {
             return("bad")
@@ -237,63 +134,64 @@ classify <- function(df, EWS, multiple = 5, threshold = 5) {
     }
 }
 
-
-## checking...
-for(i in 1:4) {
-    df <- dfs[[i]]
-    EWS <- cssds[[i]]
+diagnostic_plot <- function(df, moranI, ssd, main = "") {
+    cparam.vals <- attr(df, "bparam.vals")
     idx <- get_idx(df)
-    cparam <- attr(df, "bparam.vals")[idx]
-    ews <- EWS[idx]
-    nearsamples <- get_samples(df, "near")
-    farsamples <- get_samples(df, "far")
-    fsm <- get_first_slope(df, EWS, TRUE)
-    ssm <- get_second_slope(df, EWS, TRUE)
-    qf <- get_quadratic_fit(df, EWS)
-    dev.new()
-    palette("R4")
-    plot(cparam, ews, xlab = attr(df, "bparam"), ylab = "Moran's I")
-    lines(cparam, predict(qf), lty = 2, lwd = 1, col = 2)
-    lines(attr(df, "bparam.vals")[nearsamples], predict(ssm), lty = 1, lwd = 2, col = 3)
-    lines(attr(df, "bparam.vals")[farsamples], predict(fsm), lty = 1, lwd = 2, col = 3)
-    palette("Okabe-Ito")
-}
+    farsample <- get_samples(df, "far")
+    nearsample <- get_samples(df, "near")
 
+    farmodel.moran <- get_slope(df, moranI, "far", return.model = TRUE)
+    farmodel.ssd <- get_slope(df, ssd, "far", return.model = TRUE)
+    nearmodel.moran <- get_slope(df, moranI, "near", return.model = TRUE)
+    nearmodel.ssd <- get_slope(df, ssd, "near", return.model = TRUE)
 
+    test.moran <- classify(df, moranI)
+    test.ssd <- classify(df, ssd)
 
-
-pdf("./img/diagnostic-plots.pdf")
-for(i in seq_along(dfs)) {
-    if(isFALSE(i %in% u.down)) next
-    
-    bifplot(dfs[[i]], cparam.vals[[i]], col = adjustcolor(1, 0.5), lwd = 0.5, main = dfnames[i])
-
-    basin <- basins[[dyns[i]]]
-    idx <- switch(
-        directions[i],
-        down = which(apply(dfs[[i]], 1, min) > basin),
-        up = which(apply(dfs[[i]], 1, max) < basin)
-    )
+    bifplot(df, cparam.vals, col = adjustcolor(1, 0.5), lwd = 0.5, main = main)
+    mtext("Test results", line = 2, adj = 0, font = 2)
+    mtext(paste("Moran's I:", test.moran), line = 1, adj = 0)
+    mtext(paste("Spatial SD:", test.ssd), line = 0, adj = 0)
+    mtext(paste("Dynamics:", attr(df, "model")), line = 2, adj = 1)
+    mtext(paste("Control parameter:", attr(df, "bparam")), line = 1, adj = 1)
+    mtext(paste("Direction:", attr(df, "direction")), line = 0, adj = 1)
 
     par(new = TRUE)
     plot(
-        cparam.vals[[i]][idx], moranIs[[i]][idx], type = "l", col = 2, lwd = 2, lty = 1,
-        axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals[[i]])
+        cparam.vals[idx], moranI[idx], type = "l", col = adjustcolor(2, 0.5), lwd = 2, lty = 3,
+        axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals)
     )
-    mtext(paste("Moran's I: first =", round(f.slope$moranI[i], 3),
-                ", second =", round(s.slope$moranI[i], 3)),
-          line = -1)
-    mtext(paste("CSSD: first =", round(f.slope$cssd[i], 3),
-                ", second =", round(s.slope$cssd[i], 3)),
-          line = -3)
+    lines(cparam.vals[farsample], predict(farmodel.moran), lwd = 3, lty = 1, col = 2)
+    lines(cparam.vals[nearsample], predict(nearmodel.moran), lwd = 3, lty = 1, col = 2)
+
     par(new = TRUE)
     plot(
-        cparam.vals[[i]][idx], cssds[[i]][idx], type = "l", col = 3, lwd = 2, lty = 1,
-        axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals[[i]])
+        cparam.vals[idx], ssd[idx], type = "l", col = adjustcolor(3, 0.5), lwd = 2, lty = 3,
+        axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals)
     )
+    lines(cparam.vals[farsample], predict(farmodel.ssd), lwd = 3, lty = 1, col = 3)
+    lines(cparam.vals[nearsample], predict(nearmodel.ssd), lwd = 3, lty = 1, col = 3)
 
     legend("bottomright", bty = "n", lwd = 2, col = 2:3, lty = 1,
-           legend = c("Moran's I", "Cross-sectional SD"))
-    
+           legend = c("Moran's I", "Spatial std. dev."))
 }
+
+pdf("./img/diagnostic-plots.pdf")
+mapply(diagnostic_plot, dfs[plotorder], moranIs[plotorder], ssds[plotorder])
 dev.off()
+
+results <- data.frame(
+    result = c(mapply(classify, dfs, moranIs), mapply(classify, dfs, ssds)),
+    EWS = c(rep("moranI", length(dfs)), rep("ssd", length(dfs))),
+    dynamics = dyns,
+    network = nets,
+    bparam = bparams,
+    direction = directions
+)
+
+restab <- table(results$EWS, results$result)
+proportions(restab)*2
+
+table(results$dynamics, results$result, results$EWS)
+
+table(results$direction, results$result, results$EWS)
