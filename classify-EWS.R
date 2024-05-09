@@ -79,6 +79,15 @@ get_samples <- function(df, which = c("near", "far"), n = 3) {
     )
 }
 
+get_tau <- function(df, EWS) {
+    idx <- get_idx(df)
+
+    cparam <- attr(df, "bparam.vals")[idx]
+    ews <- EWS[idx]
+
+    cor(cparam, ews, method = "kendall")
+}
+
 get_slope <- function(df, EWS, which = c("near", "far"), n = 3, return.model = FALSE) {
     whichslope <- match.arg(which)
 
@@ -105,28 +114,28 @@ slopes <- data.frame(
 
                                         # I think we don't want an absolute value threshold: no way to know in
                                         # advance what scale the slope differences will be on.
-classify <- function(df, EWS, multiple = 2) {#, threshold = 2) {
+classify <- function(df, EWS, threshold = 2) {
     firstslope <- get_slope(df, EWS, "far")
     secondslope <- get_slope(df, EWS, "near")
 
     firstsign <- sign(firstslope)
     secondsign <- sign(secondslope)
-    mult <- secondslope/firstslope
+    ratio <- secondslope/firstslope
 
     direction <- attr(df, "direction")
 
     if(direction == "up") {
-        if(sign(firstslope) > 0 & sign(secondslope) > 0 & abs(mult) > multiple) {# & secondslope > threshold) {
+        if(sign(firstslope) > 0 & sign(secondslope) > 0 & abs(ratio) > threshold) {
             return("consistent")
-        } else if(sign(firstslope) < 0 & sign(secondslope) > 0 & abs(mult) > multiple) {# & secondslope > threshold) {
+        } else if(sign(firstslope) < 0 & sign(secondslope) > 0 & abs(ratio) > threshold) {
             return("signswitch")
         } else {
             return("bad")
         }
     } else { # down
-        if(sign(firstslope) < 0 & sign(secondslope) < 0 & abs(mult) > multiple) {# & secondslope > threshold) {
+        if(sign(firstslope) < 0 & sign(secondslope) < 0 & abs(ratio) > threshold) {
             return("consistent")
-        } else if(sign(firstslope) > 0 & sign(secondslope) < 0 & abs(mult) > 0.5*multiple) {# & secondslope > threshold) {
+        } else if(sign(firstslope) > 0 & sign(secondslope) < 0 & abs(ratio) > 0.5*threshold) {
             return("signswitch")
         } else {
             return("bad")
@@ -149,16 +158,23 @@ diagnostic_plot <- function(df, moranI, ssd, main = "") {
     test.ssd <- classify(df, ssd)
 
     bifplot(df, cparam.vals, col = adjustcolor(1, 0.5), lwd = 0.5, main = main)
+
     mtext("Test results", line = 2, adj = 0, font = 2)
     mtext(paste("Moran's I:", test.moran), line = 1, adj = 0)
     mtext(paste("Spatial SD:", test.ssd), line = 0, adj = 0)
-    mtext(paste("Dynamics:", attr(df, "model")), line = 2, adj = 1)
-    mtext(paste("Control parameter:", attr(df, "bparam")), line = 1, adj = 1)
-    mtext(paste("Direction:", attr(df, "direction")), line = 0, adj = 1)
+
+    mtext("Kendall's tau", line = 2, adj = 0.5, font = 2)
+    mtext(paste("Moran's I:", round(get_tau(df, moranI), 2)), line = 1, adj = 0.5)
+    mtext(paste("Spatial SD:", round(get_tau(df, ssd), 2)), line = 0, adj = 0.5)
+
+    mtext(paste("Dynamics:", attr(df, "model")), line = 3, adj = 1)
+    mtext(paste("Control parameter:", attr(df, "bparam")), line = 2, adj = 1)
+    mtext(paste("Direction:", attr(df, "direction")), line = 1, adj = 1)
+    mtext(paste("Network:", attr(df, "network")), line = 0, adj = 1)
 
     par(new = TRUE)
     plot(
-        cparam.vals[idx], moranI[idx], type = "l", col = adjustcolor(2, 0.5), lwd = 2, lty = 3,
+        cparam.vals[idx], moranI[idx], type = "l", col = adjustcolor(2, 0.5), lwd = 2, lty = 2,
         axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals)
     )
     lines(cparam.vals[farsample], predict(farmodel.moran), lwd = 3, lty = 1, col = 2)
@@ -166,7 +182,7 @@ diagnostic_plot <- function(df, moranI, ssd, main = "") {
 
     par(new = TRUE)
     plot(
-        cparam.vals[idx], ssd[idx], type = "l", col = adjustcolor(3, 0.5), lwd = 2, lty = 3,
+        cparam.vals[idx], ssd[idx], type = "l", col = adjustcolor(3, 0.5), lwd = 2, lty = 2,
         axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals)
     )
     lines(cparam.vals[farsample], predict(farmodel.ssd), lwd = 3, lty = 1, col = 3)
@@ -189,9 +205,11 @@ results <- data.frame(
     direction = directions
 )
 
-restab <- table(results$EWS, results$result)
-proportions(restab)*2
+## restab <- table(results$EWS, results$result)
+## proportions(restab)*2
+## addmargins(table(results$dynamics, results$result, results$EWS))[, , 1:2]
+## addmargins(table(results$direction, results$result, results$EWS))[, , 1:2]
+## table(results$dynamics, results$direction,  results$result, results$EWS)
 
-table(results$dynamics, results$result, results$EWS)
-
-table(results$direction, results$result, results$EWS)
+with(list(df = subset(results, EWS == "moranI")), table(df$dynamics, df$bparam, df$result, df$direction))
+with(list(df = subset(results, EWS == "ssd")), table(df$dynamics, df$bparam, df$result, df$direction))
