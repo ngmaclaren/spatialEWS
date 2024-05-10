@@ -1,0 +1,117 @@
+# prop_name, value
+name,windsurfers
+description,A network of interpersonal contacts among windsurfers in southern California during the Fall of 1986. The edge weights indicate the perception of social affiliations majored by the tasks in which each individual was asked​ to sort cards with other surfer’s name in the order of closeness.
+citation,"['L. Freeman, S. Freeman, & A. Michaelson, \"On human social intelligence.\" J. Social and Biological Structures 11(4), 415-425 (1988), http://www.sciencedirect.com/science/article/pii/0140175088900802']"
+url,http://konect.cc/networks/moreno_beach
+tags,"['Social', 'Offline', 'Weighted']"
+konect_meta,"category: HumanContact
+code: MW
+name: Windsurfers
+description: Person-person contacts
+entity-names: person
+extr: moreno
+url: http://moreno.ss.uci.edu/data.html#beach
+long-description: This undirected network contains interpersonal contacts between windsurfers in southern California during the fall of 1986. A node represents a windsurfer and an edge between two windsurfers shows that there was a interpersonal contact.
+relationship-names: contact
+cite: konect:freeman1988,konect:freeman1998
+"
+konect_readme,"Windsurfers network, part of the Koblenz Network Collection
+===========================================================================
+
+This directory contains the TSV and related files of the moreno_beach network: This undirected network contains interpersonal contacts between windsurfers in southern California during the fall of 1986. A node represents a windsurfer and an edge between two windsurfers shows that there was a interpersonal contact.
+
+
+More information about the network is provided here: 
+http://konect.cc/networks/moreno_beach
+
+Files: 
+    meta.moreno_beach -- Metadata about the network 
+    out.moreno_beach -- The adjacency matrix of the network in whitespace-separated values format, with one edge per line
+      The meaning of the columns in out.moreno_beach are: 
+        First column: ID of from node 
+        Second column: ID of to node
+        Third column (if present): weight or multiplicity of edge
+        Fourth column (if present):  timestamp of edges Unix time
+        Third column: edge weight
+
+
+Use the following References for citation:
+
+@MISC{konect:2017:moreno_beach,
+    title = {Windsurfers network dataset -- {KONECT}},
+    month = oct,
+    year = {2017},
+    url = {http://konect.cc/networks/moreno_beach}
+}
+
+@article{konect:freeman1998,
+	title = {Exploring Social Structure using Dynamic Three-dimensional
+                  Color Images}, 
+	author = {Freeman, Linton Clarke and Webster, Cynthia Marie and Kirke, Deirdre M.},
+	journal = {Soc. Netw.},
+	volume = {20},
+	number = {2},
+	pages = {109--118},
+	year = {1998},
+	publisher = {Elsevier},
+}
+
+@article{konect:freeman1988,
+	title = {On Human Social Intelligence},
+	author = {Freeman, Linton C. and Freeman, Sue C. and Michaelson, Alaina G.},
+	journal = {J. Soc. and Biol. Struct.},
+	volume = {11},
+	number = {4},
+	pages = {415--425},
+	year = {1988},
+}
+
+@article{konect:freeman1998,
+	title = {Exploring Social Structure using Dynamic Three-dimensional
+                  Color Images}, 
+	author = {Freeman, Linton Clarke and Webster, Cynthia Marie and Kirke, Deirdre M.},
+	journal = {Soc. Netw.},
+	volume = {20},
+	number = {2},
+	pages = {109--118},
+	year = {1998},
+	publisher = {Elsevier},
+}
+
+@article{konect:freeman1988,
+	title = {On Human Social Intelligence},
+	author = {Freeman, Linton C. and Freeman, Sue C. and Michaelson, Alaina G.},
+	journal = {J. Soc. and Biol. Struct.},
+	volume = {11},
+	number = {4},
+	pages = {415--425},
+	year = {1988},
+}
+
+
+@inproceedings{konect,
+	title = {{KONECT} -- {The} {Koblenz} {Network} {Collection}},
+	author = {Jérôme Kunegis},
+	year = {2013},
+	booktitle = {Proc. Int. Conf. on World Wide Web Companion},
+	pages = {1343--1350},
+	url = {http://dl.acm.org/citation.cfm?id=2488173},
+	url_presentation = {https://www.slideshare.net/kunegis/presentationwow},
+	url_web = {http://konect.cc/},
+	url_citations = {https://scholar.google.com/scholar?cites=7174338004474749050},
+}
+
+@inproceedings{konect,
+	title = {{KONECT} -- {The} {Koblenz} {Network} {Collection}},
+	author = {Jérôme Kunegis},
+	year = {2013},
+	booktitle = {Proc. Int. Conf. on World Wide Web Companion},
+	pages = {1343--1350},
+	url = {http://dl.acm.org/citation.cfm?id=2488173},
+	url_presentation = {https://www.slideshare.net/kunegis/presentationwow},
+	url_web = {http://konect.cc/},
+	url_citations = {https://scholar.google.com/scholar?cites=7174338004474749050},
+}
+
+
+"
