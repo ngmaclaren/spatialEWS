@@ -71,7 +71,8 @@ library(localsolver)
 networks <- readRDS("./data/networks.rds")
 
 ## order is: dyn, net, bparam, simkind, simtime, direction, ntrials
-savedir <- "/projects/academic/naokimas/neil/spatialEWS/"
+## savedir <- "/projects/academic/naokimas/neil/spatialEWS/"
+savedir <- "./data/sims/"
 filetag <- paste(unlist(args)[-which(unlist(args) %in% c("NaN", "FALSE"))], collapse = "-")
 print(filetag)
 
