@@ -46,6 +46,10 @@ option_list <- list(
     make_option(
         c("-n", "--ntrials"), type = "integer", default = 1,
         help = "The number of independent simulations to run; default is %default. Output is a list of data frames of length `ntrials`, the values of which are equilibrium node states for each node (columns) and bifurcation parameter (rows). There will be additional information in the object attributes."
+    ),
+    make_option(
+        "--sim-defaults", type = "logical", default = TRUE,
+        help = "Use the preset simulation parameters (e.g., range of the control parameter). Defaults to %default."
     )
 )
 
@@ -56,11 +60,11 @@ args <- parse_args(
 
                                         # For debugging
 if(interactive()) {
-    args$network <- "adjnoun"
+    args$network <- "email_company"
     args$model <- "doublewell"
-    args$bparam <- "u"
+    args$bparam <- "D"
     args$direction <- "down"
-    ## args$uinit <- -5
+    args$uinit <- -5
 }
 
 library(parallel)
@@ -71,7 +75,8 @@ library(localsolver)
 networks <- readRDS("./data/networks.rds")
 
 ## order is: dyn, net, bparam, simkind, simtime, direction, ntrials
-savedir <- "/projects/academic/naokimas/neil/spatialEWS/"
+## savedir <- "/projects/academic/naokimas/neil/spatialEWS/"
+savedir <- "./data/sims/"
 filetag <- paste(unlist(args)[-which(unlist(args) %in% c("NaN", "FALSE"))], collapse = "-")
 print(filetag)
 
@@ -83,26 +88,36 @@ g <- networks[[args$network]]
 A <- as_adj(g, "both", sparse = FALSE)
 N <- vcount(g)
 
-deltaT <- 0.01
-lmax <- 100
-
 model <- get(args$model)
 modelparams <- get(paste0(".", args$model))
+lmax <- 100 # expose this
+deltaT <- 0.01 # expose this
 
-                                        # Set params from the separate file here
-refparams <- read.csv("./data/cparam-values.csv")
-rowfilter <- refparams$model == args$model & refparams$cparam == args$bparam & refparams$direction == args$direction
-farlim <- refparams$farlim[rowfilter]
-biflim <- refparams$biflim[rowfilter]
-if(args$bparam == "D") {
-    modelparams$Ds <- seq(farlim, biflim, length.out = lmax)
-} else {
-    modelparams$us <- seq(farlim, biflim, length.out = lmax)
+
+                                        # if use defaults, sb flag default true
+if(args$sim_defaults) {
+    sparams <- read.csv("./data/simulation-parameters.csv") 
+    sparams <- subset(
+        sparams,
+        dynamics == args$model &
+        cparam == args$bparam &
+        direction == args$direction &
+        network == args$network
+    )
+    deltaT <- sparams$deltaT
+    if(args$bparam == "u") Dinit <- sparams$D
+    ##rng <- seq(rng.far, rng.near, length.out = lmax)
+    if(args$bparam == "D") {
+        modelparams$Ds <- seq(sparams$rng.far, sparams$rng.near, length.out = lmax)
+    } else {
+        modelparams$us <- seq(sparams$rng.far, sparams$rng.near, length.out = lmax)
+    }
 }
 
                                         # The initial x value often has a value that makes sense.
                                         # That value is stored in the standard parameter list.
                                         # Select that value, then assign it to every node.
+
 if(is.finite(args$xinit)) {
     ## xinit <- rep(args$xinit, N)
     xinit <- args$xinit
@@ -114,6 +129,18 @@ xinit <- rep(xinit, N)
 if(is.finite(args$sigma)) modelparams$sigma <- args$sigma
 if(is.finite(args$uinit)) modelparams$u <- args$uinit
 if(is.finite(args$Dinit)) modelparams$D <- args$Dinit
+
+
+##                                         # Set params from the separate file here
+## refparams <- read.csv("./data/cparam-values.csv")
+## rowfilter <- refparams$model == args$model & refparams$cparam == args$bparam & refparams$direction == args$direction
+## farlim <- refparams$farlim[rowfilter]
+## biflim <- refparams$biflim[rowfilter]
+## if(args$bparam == "D") {
+##     modelparams$Ds <- seq(farlim, biflim, length.out = lmax)
+## } else {
+##     modelparams$us <- seq(farlim, biflim, length.out = lmax)
+## }
 
 params <- c(modelparams, list(A = A))
 control <- list(ncores = ncores, times = 0:args$simtime, deltaT = deltaT)

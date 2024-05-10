@@ -1,6 +1,8 @@
 # File types
 *~
 *.org
+*.ods
+*.odt
 
 # Specific files
 fromUBcluster-spatialEWS.txt
