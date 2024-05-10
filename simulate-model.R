@@ -62,9 +62,9 @@ args <- parse_args(
 if(interactive()) {
     args$network <- "email_company"
     args$model <- "doublewell"
-    args$bparam <- "D"
-    args$direction <- "down"
-    args$uinit <- -5
+    args$bparam <- "u"
+    args$direction <- "up"
+    ##args$uinit <- -5
 }
 
 library(parallel)
@@ -76,7 +76,7 @@ networks <- readRDS("./data/networks.rds")
 
 ## order is: dyn, net, bparam, simkind, simtime, direction, ntrials
 ## savedir <- "/projects/academic/naokimas/neil/spatialEWS/"
-savedir <- "./data/sims/"
+savedir <- "./data/sims/" # adjust to check for the existence of ./data/sims
 filetag <- paste(unlist(args)[-which(unlist(args) %in% c("NaN", "FALSE"))], collapse = "-")
 print(filetag)
 
@@ -105,7 +105,7 @@ if(args$sim_defaults) {
         network == args$network
     )
     deltaT <- sparams$deltaT
-    if(args$bparam == "u") Dinit <- sparams$D
+    if(args$bparam == "u") args$Dinit <- sparams$D
     ##rng <- seq(rng.far, rng.near, length.out = lmax)
     if(args$bparam == "D") {
         modelparams$Ds <- seq(sparams$rng.far, sparams$rng.near, length.out = lmax)
