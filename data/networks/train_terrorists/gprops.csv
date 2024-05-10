@@ -1,0 +1,95 @@
+# prop_name, value
+name,train_terrorists
+description,"A network of associations among the terrorists involved in the 2004 Madrid train bombing, as reconstructed from press stories after-the-fact. Edge weights encode four levels of connection strength: friendships, ties to Al Qaeda and Osama Bin Laden, co-participants in wars, and co-participants in previous terrorist attacks."
+citation,"['B. Hayes, \"Connecting the Dots: Can the tools of graph theory and social-network studies unravel the next big plot?\" American Scientist 94(5), 400-404 (2006), http://www.americanscientist.org/issues/id.3495,y.2006,no.5,page.5/postComment.aspx']"
+url,http://konect.cc/networks/moreno_train
+tags,"['Social', 'Offline', 'Weighted']"
+konect_meta,"category: HumanSocial
+code: Mt
+name: Train bombing
+description: Terrorist–terrorist contacts
+entity-names: terrorist
+extr: moreno
+url: http://moreno.ss.uci.edu/data.html#train
+long-description: This undirected network contains contacts between suspected terrorists involved in the train bombing of Madrid on March 11, 2004 as reconstructed from newspapers. A node represents a terrorist and an edge between two terrorists shows that there was a contact between the two terroists. The edge weights denote how 'strong' a connection was. This includes friendship and co-participating in training camps or previous attacks. 
+relationship-names: contact
+cite: konect:hayes
+"
+konect_readme,"Train bombing network, part of the Koblenz Network Collection
+===========================================================================
+
+This directory contains the TSV and related files of the moreno_train network: This undirected network contains contacts between suspected terrorists involved in the train bombing of Madrid on March 11, 2004 as reconstructed from newspapers. A node represents a terrorist and an edge between two terrorists shows that there was a contact between the two terroists. The edge weights denote how 'strong' a connection was. This includes friendship and co-participating in training camps or previous attacks. 
+
+
+More information about the network is provided here: 
+http://konect.cc/networks/moreno_train
+
+Files: 
+    meta.moreno_train -- Metadata about the network 
+    out.moreno_train -- The adjacency matrix of the network in whitespace-separated values format, with one edge per line
+      The meaning of the columns in out.moreno_train are: 
+        First column: ID of from node 
+        Second column: ID of to node
+        Third column (if present): weight or multiplicity of edge
+        Fourth column (if present):  timestamp of edges Unix time
+        Third column: edge weight
+
+
+Use the following References for citation:
+
+@MISC{konect:2017:moreno_train,
+    title = {Train bombing network dataset -- {KONECT}},
+    month = oct,
+    year = {2017},
+    url = {http://konect.cc/networks/moreno_train}
+}
+
+@article{konect:hayes,
+	title = {Connecting the Dots. Can the Tools of Graph Theory and
+                  Social-network Studies Unravel the Next Big Plot?}, 
+	author = {Hayes, Brian},
+	journal = {Am. Scientist},
+	volume = {94},
+	number = {5},
+	pages = {400--404},
+	year = {2006},
+}
+
+@article{konect:hayes,
+	title = {Connecting the Dots. Can the Tools of Graph Theory and
+                  Social-network Studies Unravel the Next Big Plot?}, 
+	author = {Hayes, Brian},
+	journal = {Am. Scientist},
+	volume = {94},
+	number = {5},
+	pages = {400--404},
+	year = {2006},
+}
+
+
+@inproceedings{konect,
+	title = {{KONECT} -- {The} {Koblenz} {Network} {Collection}},
+	author = {Jérôme Kunegis},
+	year = {2013},
+	booktitle = {Proc. Int. Conf. on World Wide Web Companion},
+	pages = {1343--1350},
+	url = {http://dl.acm.org/citation.cfm?id=2488173},
+	url_presentation = {https://www.slideshare.net/kunegis/presentationwow},
+	url_web = {http://konect.cc/},
+	url_citations = {https://scholar.google.com/scholar?cites=7174338004474749050},
+}
+
+@inproceedings{konect,
+	title = {{KONECT} -- {The} {Koblenz} {Network} {Collection}},
+	author = {Jérôme Kunegis},
+	year = {2013},
+	booktitle = {Proc. Int. Conf. on World Wide Web Companion},
+	pages = {1343--1350},
+	url = {http://dl.acm.org/citation.cfm?id=2488173},
+	url_presentation = {https://www.slideshare.net/kunegis/presentationwow},
+	url_web = {http://konect.cc/},
+	url_citations = {https://scholar.google.com/scholar?cites=7174338004474749050},
+}
+
+
+"

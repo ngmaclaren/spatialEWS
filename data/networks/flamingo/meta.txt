@@ -1,0 +1,14 @@
+https://networks.skewed.de/net/software_dependencies
+
+Several networks of software dependencies. Nodes represent libraries and a directed edge denotes a library dependency on another.
+
+
+
+        Šubelj & Bajec (2012). Software systems through complex networks science, Proc. of SoftwareMining 12, p. 9, https://doi.org/10.1145/2384416.2384418 [@sci-hub]
+        Šubelj & Bajec (2011). Community structure of complex software systems, Physica A 390(16), 2968, https://doi.org/10.1016/j.physa.2011.03.036 [@sci-hub]
+        Šubelj & Bajec (2012). Software systems through complex networks science, Proc. of SoftwareMining 12, p. 9, https://doi.org/10.1145/2384416.2384418 [@sci-hub]
+        Šubelj & Bajec (2012). Clustering assortativity, communities and functional modules in real-world networks, pp. 21., http://arxiv.org/abs/1202.3188
+        Šubelj et al. (2014). Node mixing and group structure of complex software networks, Advs. Complex Syst. 17(7), 1450022., https://doi.org/10.1142/S0219525914500222 [@sci-hub]
+
+http://wwwlovre.appspot.com/support.jsp
+

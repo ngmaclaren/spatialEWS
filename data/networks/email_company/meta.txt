@@ -1,0 +1,7 @@
+https://networks.skewed.de/net/email_company
+
+A network of emails among employee email addresses at a mid-sized manufacturing company. Each directed edge represents an email sent from address i to address j. Edges are timestamped, and occurred over a 6 month period in an unspecified year.
+
+R. Michalski, S. Palus, and P. Kazienko, "Matching organizational structure and social network extracted from email communication." In Lecture Notes in Business Information Processing 87, 197-206 (2011), https://doi.org/10.1007/978-3-642-21863-7_17
+
+http://konect.cc/networks/radoslaw_email

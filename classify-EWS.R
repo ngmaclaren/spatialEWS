@@ -1,3 +1,10 @@
+## TASKS
+## - multiply tau by -1 if direction is down
+## - analyze tau, potentially distribution, or with a cutoff
+## - add more networks. Since this is on the cluster anyway, why not larger? Go for 20 networks (currently at 10).
+## Options: proximity, metabolic, [macaques, highschool, residence, windsurfers, trainbombers, drug, netsci, herm, freshwatertrophic, Chesapeake, physicians, emailmanufacturing, flamingo, ecoli]
+## - remove the tree network. Replace with SBM. Naoki likes HK/LFR, but I don't like fitting them. Maybe I'll re-implement HK based on the NetworkX code.
+
 library(igraph)
 library(localsolver)
 source("calc-functions.R")
