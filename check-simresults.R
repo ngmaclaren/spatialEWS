@@ -35,6 +35,11 @@ conds <- as.data.frame(cbind(dyns, bparams, directions, nets))
 plotorder <- with(conds, order(dyns, bparams, directions, nets))
 
 pdf("./img/checksims.pdf")
-mapply(function(df, cparam.val, main) bifplot(df, cparam.val, lwd = 0.5, col = 1, main = main),
-       dfs[plotorder], cparam.vals[plotorder], dfnames[plotorder])
+mapply(
+    function(df, cparam.val, main) {
+        bifplot(df, cparam.val, lwd = 0.5, col = 1, main = main)
+        ##abline(h = 0.001, col = "red")
+    }, 
+    dfs[plotorder], cparam.vals[plotorder], dfnames[plotorder]
+)
 dev.off()

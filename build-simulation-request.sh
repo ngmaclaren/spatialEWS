@@ -8,7 +8,8 @@
 
 # lists of conditions
 # models=("doublewell" "mutualistic" "genereg" "SIS")
-models=("doublewell" "mutualistic" "SIS")
+# models=("doublewell" "mutualistic" "SIS")
+models=("genereg")
 networks=(`cat ./data/networknames.txt`)
 bparams=("D" "u")
 directions=("up" "down")

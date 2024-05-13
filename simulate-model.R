@@ -60,10 +60,10 @@ args <- parse_args(
 
                                         # For debugging
 if(interactive()) {
-    args$network <- "montreal"
-    args$model <- "SIS" # "doublewell" "mutualistic"
-    args$bparam <- "D" # "u"
-    args$direction <- "up" # "down"
+    args$network <- "windsurfers"
+    args$model <- "genereg" # "doublewell" "mutualistic"
+    args$bparam <- "u" # "D"
+    args$direction <- "down" # "up"
     ##args$uinit <- -5
 }
 
@@ -154,16 +154,16 @@ rng <- switch(
 )
 
                                         # Debugging
-if(interactive()) { # system.time() won't print to stdout like this---run each line individually, or paste somewhere else
-    system.time(X <- sde(xinit, control$times, model, params, control))
-    system.time(result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind))
-    rowMeans(result)
-    ## result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind)
-    pdf(paste0(filetag, "-bifplot.pdf"))
-    bifplot(result, rng, col = 1)
-    abline(h = 0, col = 2)
-    dev.off()
-}
+## if(interactive()) { # system.time() won't print to stdout like this---run each line individually, or paste somewhere else
+##     system.time(X <- sde(xinit, control$times, model, params, control))
+##     system.time(result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind))
+##     rowMeans(result)
+##     ## result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind)
+##     pdf(paste0(filetag, "-bifplot.pdf"))
+##     bifplot(result, rng, col = 1)
+##     abline(h = 0, col = 2)
+##     dev.off()
+## }
 
 
                                         # Main simulations
