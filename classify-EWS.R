@@ -58,7 +58,7 @@ basins <- list( ## GLOBAL
     doublewell = 3,
     genereg = 0.1,
     mutualistic = 1,
-    SIS = 0.1
+    SIS = 0.01
 )
 
 ## Now, all the information I need should be with the df

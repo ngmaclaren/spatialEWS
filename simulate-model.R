@@ -60,10 +60,10 @@ args <- parse_args(
 
                                         # For debugging
 if(interactive()) {
-    args$network <- "email_company"
-    args$model <- "doublewell"
-    args$bparam <- "u"
-    args$direction <- "up"
+    args$network <- "montreal"
+    args$model <- "SIS" # "doublewell" "mutualistic"
+    args$bparam <- "D" # "u"
+    args$direction <- "up" # "down"
     ##args$uinit <- -5
 }
 
