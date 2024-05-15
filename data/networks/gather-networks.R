@@ -22,7 +22,7 @@ dirs <- c(
     "drug",
     "ecoli",
     "email_company",
-    "euroroad",
+    ## "euroroad",
     "flamingo",
     "football",
     "gap_junction_herm",
@@ -30,7 +30,8 @@ dirs <- c(
     "hk100",
     "iceland",
     "jazz",
-    "jung-c",
+    "jung_c",
+    "london_transport",
     "metabolic",
     "montreal",
     "netsci",
@@ -40,8 +41,9 @@ dirs <- c(
     "SITC",
     "students",
     "train_terrorists",
-    "us_air_traffic",
-    "wiki-ht",
+    "ug_village",
+    ## "us_air_traffic",
+    "wiki_ht",
     "windsurfers",
     "yeast"
 )
@@ -76,10 +78,10 @@ sapply(networks, is_weighted)
 ## g <- networks$students
 ## plot(g, vertex.size = 5, vertex.label = "")
 .plot <- function(g) plot(g, vertex.size = 5, vertex.label = "", main = g$name)
-for(g in networks) {
-    dev.new()
-    .plot(g)
-}
+
+pdf("networks.pdf")
+for(g in networks) .plot(g)
+dev.off()
 
 saveRDS(networks, "./networks.rds")
 
