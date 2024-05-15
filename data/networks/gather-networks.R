@@ -1,27 +1,49 @@
+## Directed networks: yeast, air_carrier (maybe), jung
+## Weighted: product export,
+## Main euroroad
+## -------------
+## Konect: iceland, Wikipedia talk (ht), hamsterster (I think the lcc is smaller), contiguous USA, gene fusion
+
 library(igraph)
+set.seed(123)
+
+                                        # Only needed once...
+## usair <- read.csv("./us_air_traffic/edges.csv")
+## usair <- usair[usair$year == 2020, ]
+## write.csv(usair, file = "./us_air_traffic/edges.csv", row.names = FALSE)
 
 dirs <- c(
     "adjnoun",
     "canton",
     "catlins",
     "chesapeake",
+    "contigusa",
     "dolphin",
     "drug",
     "ecoli",
     "email_company",
+    "euroroad",
     "flamingo",
+    "football",
     "gap_junction_herm",
+    "genefusion",
+    "hk100",
+    "iceland",
     "jazz",
+    "jung-c",
     "metabolic",
     "montreal",
     "netsci",
-    ## "pdzbase",
     "physician_trust",
     "protein",
     "proximity",
+    "SITC",
     "students",
     "train_terrorists",
-    "windsurfers"
+    "us_air_traffic",
+    "wiki-ht",
+    "windsurfers",
+    "yeast"
 )
 
 gather_network <- function(dir) {
@@ -39,7 +61,7 @@ N <- 100
 networks$smallworld <- sample_smallworld(1, N, 4, 0.02)
 networks$barabasialbert <- sample_pa(N, m = 2, directed = FALSE, start.graph = make_full_graph(3))
 networks$erdosrenyi <- largest_component(sample_gnp(N, 0.05))
-networks$tree <- make_tree(N, mode = "undirected")
+## networks$tree <- make_tree(N, mode = "undirected")
 networks$lattice <- make_lattice(length = 10, dim = 2, circular = TRUE)
 
 networks <- networks[order(sapply(networks, vcount))]

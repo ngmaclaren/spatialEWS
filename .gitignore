@@ -11,6 +11,7 @@ fromUBcluster-spatialEWS.txt
 docs/
 img/
 old/
+data/networks/
 data/sims/
 outfiles/
 tex/
