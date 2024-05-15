@@ -7,10 +7,12 @@
 # directions=("up")
 
 # lists of conditions
-# models=("doublewell" "mutualistic" "genereg" "SIS")
+models=("doublewell" "mutualistic" "genereg" "SIS")
 # models=("doublewell" "mutualistic" "SIS")
-models=("genereg")
-networks=(`cat ./data/networknames.txt`)
+# models=("genereg")
+# networks=(`cat ./data/networknames.txt`)
+# networks=(`cat ./data/newnetworknames.txt`)
+networks=("euroroad" "us_air_traffic")
 bparams=("D" "u")
 directions=("up" "down")
 
@@ -60,39 +62,3 @@ for network in ${networks[@]}; do
 	done
     done
 done
-
-
-
-
-# for model in ${models[@]}; do
-#     for network in ${networks[@]}; do
-# 	for bparam in ${bparams[@]}; do
-# 	    for direction in ${directions[@]}; do
-# 		# Skip conditions that aren't physical
-# 		# if [[ ${model} == "SIS" && ${direction} == "down" ]]; then
-# 		#     continue
-# 		# fi
-# 		if [[ ${model} == "SIS" && ${bparam} == "u" ]]; then
-# 		    continue
-# 		fi
-# 		# if [[ ${model} == "genereg" && ${direction} == "up" ]]; then
-# 		#     continue
-# 		# fi
-
-# 		# Accommodate negative u required for doublewell/mutualistic models to bifurcate when the bparam is D and the direction is down
-# 		if [[ (${model} == "doublewell" || ${model} == "mutualistic") &&
-# 			  ${direction} == "down" && ${bparam} == "D" ]]; then
-# 		    uinit="-5"; else
-# 		    uinit="0"
-# 		fi
-		    
-# 		jobname=$(printf "sim-%03d" "${counter}")
-
-# 		sbatch --job-name=${jobname} --output=./outfiles/${jobname}.out request-simulation.sh ${model} ${network} ${bparam} ${direction} ${uinit} ${ntrials}
-
-# 		((counter++))
-# 	    done
-# 	done
-#     done
-# done
-

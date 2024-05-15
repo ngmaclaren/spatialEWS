@@ -2,6 +2,8 @@ library(igraph)
 library(localsolver)
 
 networks <- readRDS("./data/networks.rds")
+nets <- scan("./data/newnetworknames.txt", character())
+networks <- networks[nets]
 
 simdir <- "./data/sims/"
 simfiles <- list.files(simdir)

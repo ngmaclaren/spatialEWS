@@ -60,11 +60,11 @@ args <- parse_args(
 
                                         # For debugging
 if(interactive()) {
-    args$network <- "windsurfers"
-    args$model <- "genereg" # "doublewell" "mutualistic"
-    args$bparam <- "u" # "D"
+    args$network <- "euroroad"
+    args$model <- "doublewell" # "genereg" "mutualistic" "SIS"
+    args$bparam <- "D" # "u"
     args$direction <- "down" # "up"
-    ##args$uinit <- -5
+    args$uinit <- -5
 }
 
 library(parallel)
