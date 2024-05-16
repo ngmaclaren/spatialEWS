@@ -2,11 +2,11 @@ library(igraph)
 library(localsolver)
 
 networks <- readRDS("./data/networks.rds")
-nets <- scan("./data/newnetworknames.txt", character())
-networks <- networks[nets]
+netlist <- scan("./data/newnetworknames.txt", character())
+## networks <- networks[nets]
 
 simdir <- "./data/sims/"
-simfiles <- list.files(simdir)
+simfiles <- list.files(simdir, pattern = ".rds")
 simdata <- lapply(paste0(simdir, simfiles), function(simfile) readRDS(simfile))
 
 dyns <- sapply(simdata, attr, "model")
@@ -34,13 +34,14 @@ dfnames <- mapply(
 names(dfs) <- dfnames
 
 conds <- as.data.frame(cbind(dyns, bparams, directions, nets))
-plotorder <- with(conds, order(dyns, bparams, directions, nets))
+plotorder <- with(conds, order(dyns, bparams, directions, nets))#[grep("genereg", dfnames)]
 
 pdf("./img/checksims.pdf")
 mapply(
     function(df, cparam.val, main) {
-        bifplot(df, cparam.val, lwd = 0.5, col = 1, main = main)
+        bifplot(df, cparam.val, lwd = 0.5, col = 1, main = main)#, ylim = c(0, 0.1))
         ##abline(h = 0.001, col = "red")
+        ##print(main)
     }, 
     dfs[plotorder], cparam.vals[plotorder], dfnames[plotorder]
 )

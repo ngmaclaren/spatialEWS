@@ -1,18 +1,8 @@
 #!/bin/bash
 
-# debugging
-# models=("doublewell")
-# networks=("dolphin")
-# bparams=("D")
-# directions=("up")
-
 # lists of conditions
 models=("doublewell" "mutualistic" "genereg" "SIS")
-# models=("doublewell" "mutualistic" "SIS")
-# models=("genereg")
-# networks=(`cat ./data/networknames.txt`)
-# networks=(`cat ./data/newnetworknames.txt`)
-networks=("euroroad" "us_air_traffic")
+networks=(`cat ./data/networknames.txt`)
 bparams=("D" "u")
 directions=("up" "down")
 
@@ -50,7 +40,6 @@ for network in ${networks[@]}; do
 		    uinit="0"
 		fi
 
-		# jobname=$(printf "sim-%03d" "${counter}")
 		jobname=${network}-${model}-${bparam}-${direction}
 		# echo ${jobname}
 		# echo ${counter}
