@@ -2,9 +2,9 @@
 ## D, down
 ## D = 0.4
 
-## use localsolver
+## use sdn
 library(igraph)
-library(localsolver)
+library(sdn)
 library(runner)
 
 save_plots <- TRUE # FALSE

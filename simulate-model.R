@@ -4,7 +4,7 @@ library(optparse)
 option_list <- list(
     make_option(
         c("-m", "--model"), type = "character", default = "doublewell",
-        help = "Default is %default. Available: doublewell, mutualistic, genereg, and SIS (from package:localsolver). Each has some standard parameter values and accepts /D/, a node susceptibility parameter, and /u/, a stress parameter. As a control parameter, /u/ can be positive with '--direction=up' or negative with '--direction=down'."
+        help = "Default is %default. Available: doublewell, mutualistic, genereg, and SIS (from package:sdn). Each has some standard parameter values and accepts /D/, a node susceptibility parameter, and /u/, a stress parameter. As a control parameter, /u/ can be positive with '--direction=up' or negative with '--direction=down'."
     ),
     make_option(
         c("-g", "--network"), type = "character", default = "dolphin",
@@ -60,9 +60,9 @@ args <- parse_args(
 
                                         # For debugging
 if(interactive()) {
-    args$network <- "ug_village"
-    args$model <- "doublewell" # "genereg" "mutualistic" "SIS"
-    args$bparam <- "u" # "D"
+    args$network <- "drug"
+    args$model <- "SIS" # "doublewell" "genereg" "mutualistic"
+    args$bparam <- "D" # "u"
     args$direction <- "up" # "down"
     ##args$uinit <- -5
 }
@@ -70,7 +70,7 @@ if(interactive()) {
 library(parallel)
 ncores <- detectCores()-1
 library(igraph)
-library(localsolver)
+library(sdn)
 
 networks <- readRDS("./data/networks.rds")
 

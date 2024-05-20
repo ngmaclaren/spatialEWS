@@ -1,5 +1,5 @@
 library(igraph)
-library(localsolver)
+library(sdn)
 
 networks <- readRDS("./data/networks.rds")
 netlist <- scan("./data/newnetworknames.txt", character())

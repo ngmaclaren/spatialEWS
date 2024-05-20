@@ -1,9 +1,0 @@
-model,cparam,direction,farlim,biflim
-doublewell,D,up,0,0.7
-SIS,D,up,0,0.5
-doublewell,u,up,0,3
-doublewell,D,down,1,0
-mutualistic,D,down,2,0
-SIS,D,down,1,0
-doublewell,u,down,0,-5
-mutualistic,u,down,0,-4

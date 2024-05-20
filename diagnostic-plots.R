@@ -1,5 +1,5 @@
 library(igraph)
-library(localsolver)
+library(sdn)
 source("calc-functions.R")
 palette("Okabe-Ito")
 

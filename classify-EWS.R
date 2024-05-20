@@ -1,22 +1,17 @@
-## TASKS
-## - multiply tau by -1 if direction is down
-## - analyze tau, potentially distribution, or with a cutoff
-## - add more networks. Since this is on the cluster anyway, why not larger? Go for 20 networks (currently at 10).
-## Options: proximity, metabolic, [macaques, highschool, residence, windsurfers, trainbombers, drug, netsci, herm, freshwatertrophic, Chesapeake, physicians, emailmanufacturing, flamingo, ecoli]
-## - remove the tree network. Replace with SBM. Naoki likes HK/LFR, but I don't like fitting them. Maybe I'll re-implement HK based on the NetworkX code.
-
+library(parallel)
+ncores <- detectCores()-1
 library(igraph)
-library(localsolver)
+library(sdn)
 source("calc-functions.R")
 palette("Okabe-Ito")
 ## with(list(n = length(palette())), plot(seq(n), rep(1, n), col = seq(n), cex = 5, pch = 16))
 ## dev.new(width = 14, height = 3); plot(0:24, rep(1, 25), pch = 0:24, cex = 5, col = 1, bg = 2)
-save_plots <- FALSE
+save_plots <- TRUE # FALSE
 
 networks <- readRDS("./data/networks.rds")
 
 simdir <- "./data/sims/"
-simfiles <- list.files(simdir)
+simfiles <- list.files(simdir, pattern = ".rds")
 simdata <- lapply(paste0(simdir, simfiles), function(simfile) readRDS(simfile))
 
 dyns <- sapply(simdata, attr, "model")
@@ -51,9 +46,9 @@ u.up <- which(grepl("-u-", dfnames, fixed = TRUE) & grepl("-up", dfnames, fixed 
 D.down <- which(grepl("-D-", dfnames, fixed = TRUE) & grepl("-down", dfnames, fixed = TRUE))
 D.up <- which(grepl("-D-", dfnames, fixed = TRUE) & grepl("-up", dfnames, fixed = TRUE))
 
-moranIs<- mapply(
+moranIs<- mcmapply(
     function(df, A) apply(df, 1, global_moran, A = A),
-    dfs, As, SIMPLIFY = FALSE, USE.NAMES = TRUE
+    dfs, As, SIMPLIFY = FALSE, USE.NAMES = TRUE, mc.cores = ncores
 )
 ssds <- lapply(dfs, function(df) apply(df, 1, sd))
 
@@ -91,6 +86,8 @@ get_samples <- function(df, which = c("near", "far"), n = 3) {
 
 get_tau <- function(df, EWS, adjust.sign = FALSE) {
     idx <- get_idx(df)
+    midpoint <- floor(median(idx))
+    idx <- idx[which(idx > midpoint)]
 
     cparam <- attr(df, "bparam.vals")[idx]
     ews <- EWS[idx]
@@ -133,6 +130,8 @@ slopes <- data.frame(
     moran.far = mapply(get_slope, dfs, moranIs, which = "far", n = 3),
     moran.near = mapply(get_slope, dfs, moranIs, which = "near", n = 3)
 )
+
+        
 
 plotdata <- data.frame(
     tau.I = taus$moranI, # these are 'sign-adjusted'
@@ -300,3 +299,14 @@ print("Moran's I")
 with(list(df = subset(results, EWS == "moranI")), table(df$dynamics, df$bparam, df$result, df$direction))
 print("Spatial standard deviation")
 with(list(df = subset(results, EWS == "ssd")), table(df$dynamics, df$bparam, df$result, df$direction))
+
+
+                                        # data for example figure panels
+with(
+    list(
+        idx = grep("drug", nets)
+    ), {
+        print(taus$ssd[idx])
+        print(mapply(classify, dfs[idx], ssds[idx]))
+    }
+)
