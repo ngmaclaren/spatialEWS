@@ -144,6 +144,9 @@ if(is.finite(args$Dinit)) modelparams$D <- args$Dinit
 
 params <- c(modelparams, list(A = A))
 control <- list(ncores = ncores, times = 0:args$simtime, deltaT = deltaT)
+if(args$model %in% c("SIS", "mutualistic", "genereg")) {
+    control$absorbing.state <- list(value = 0, which = "floor")
+}
 
 rng <- switch(
     args$bparam,
