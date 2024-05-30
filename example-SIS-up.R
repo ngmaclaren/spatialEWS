@@ -39,7 +39,7 @@ draw_spatial_correlation <- function(g, xi, ...) {
     plot(g, vertex.size = 10, vertex.label = "",
          vertex.frame.color = adjustcolor(9, 0.5), 
          ##vertex.color = get_colors(xi, col.min, col.max, rescale.cols = FALSE),
-         vertex.color = get_colors(xi, hcl.pal = "Spectral", n = 5, rescale.cols = TRUE, xi.max = 1, rev = TRUE),
+         vertex.color = get_colors(xi, hcl.pal = "Spectral", n = 5, rescale.cols = TRUE, xi.max = NULL, rev = TRUE),
          edge.color = adjustcolor(9, 0.5), ...)
 }
 
@@ -52,7 +52,7 @@ dw.Dd <- readRDS("./data/sims/doublewell-drug-D-sde-50-down--5-1-TRUE.rds")
 canton <- readRDS("./data/sims/doublewell-canton-D-sde-50-down--5-1-TRUE.rds")
 catlins <- readRDS("./data/sims/doublewell-catlins-D-sde-50-down--5-1-TRUE.rds")
 
-sim <- SIS.Dd # catlins canton
+sim <- SIS.Du # catlins canton
 g <- networks[["drug"]] # catlins canton
 A <- as_adj(g, "both", sparse = FALSE)
 N <- vcount(g)
@@ -81,17 +81,24 @@ pht <- pwd <- 4
 wd <- 3.5*pwd
 ht <- 1.5*pwd
 if(save_plots) {
-    pdf("./img/example-SIS-top.pdf", height = ht, width = wd)
+    pdf("./img/example-SIS-up-top.pdf", height = ht, width = wd)
 } else {
     dev.new(height = ht, width = wd)
 }
 layoutmatrix <- matrix(1:3, byrow = TRUE, nrow = 1)
 thelayout <- layout(layoutmatrix, widths = rep(lcm(2.25*pwd), 3), heights = lcm(2.25*pht))
 
+df <- promote_df(sim)
+A <- attr(df, "params")$A
+D <- attr(df, "bparam.vals")
+
+idx <- get_idx(df)
+xlim <- c(0, 0.15)#range(bparam.vals[idx])
+
                                         # The xi, panel (a)
 par(mar = c(5, 5, 0.5, 0.5))
 matplot(bparam.vals, X, type = "l", lty = 1, col = 9,
-        xlab = "D", ylab = expression(x[i]), axes = FALSE, cex.lab = 2)
+        xlab = "D", ylab = expression(x[i]), axes = FALSE, cex.lab = 2, xlim = xlim, ylim = c(0, 1e-2))
 eaxis(1, cex.axis = 2)
 eaxis(2, cex.axis = 2)
 segments(
@@ -99,11 +106,6 @@ segments(
         col = 2, lty = 1, lwd = 4
 )
 
-df <- promote_df(sim)
-A <- attr(df, "params")$A
-D <- attr(df, "bparam.vals")
-
-idx <- get_idx(df)
 
 moranI <- apply(df, 1, global_moran, A = A)[idx]
 ssd <- apply(df, 1, sd)[idx]
@@ -120,7 +122,8 @@ farmodel.sd <- get_slope(df, ssd, which = "far", n = n, return.model = TRUE)
 nearmodel.sd <- get_slope(df, ssd, which = "near", n = n, return.model = TRUE)
 
                                         # Moran's I, panel (b)
-plot(D[idx], moranI[idx], type = "l", xlim = range(D), lty = 1, lwd = 2, col = adjustcolor(2, 0.5),
+plot(D[idx], moranI[idx], type = "l", xlim = xlim, #xlim = range(D),
+     lty = 1, lwd = 2, col = adjustcolor(2, 0.5),
      xlab = "", ylab = "", axes = FALSE)
 lines(D[farsample], predict(farmodel.I), lwd = 4, col = 2, lty = 1)
 lines(D[nearsample], predict(nearmodel.I), lwd = 4, col = 2, lty = 1)
@@ -131,7 +134,8 @@ title(xlab = attr(df, "bparam"), cex.lab = 2)
 legend("bottomright", col = 2, lwd = 2, lty = 1, legend = "Moran's I", bty = "n", cex = 1.75)
 
                                         # SSD, panel (c)
-plot(D[idx], ssd[idx], type = "l", xlim = range(D), lty = 1, lwd = 2, col = adjustcolor(3, 0.5),
+plot(D[idx], ssd[idx], type = "l", xlim = xlim, #xlim = range(D),
+     lty = 1, lwd = 2, col = adjustcolor(3, 0.5),
      xlab = "", ylab = "", axes = FALSE)
 lines(D[farsample], predict(farmodel.sd), lwd = 4, col = 3, lty = 1)
 lines(D[nearsample], predict(nearmodel.sd), lwd = 4, col = 3, lty = 1)
@@ -146,15 +150,15 @@ if(save_plots) dev.off()
 ### new figure
 
 
-wd <- 5*pwd#3.25*pwd
-ht <- 1*pwd#2*pht
+wd <- 4.5*pwd#3.25*pwd
+ht <- 1.5*pwd#2*pht
 if(save_plots) {
-    pdf("./img/example-SIS-bottom.pdf", height = ht, width = wd)
+    pdf("./img/example-SIS-up-bottom.pdf", height = ht, width = wd)
 } else {
     dev.new(height = ht, width = wd)
 }
-layoutmatrix <- matrix(1:5, nrow = 1, byrow = TRUE)
-thelayout <- layout(layoutmatrix, widths = c(rep(lcm(2.25*pwd), 4), lcm(2.25*0.25*pwd)), heights = lcm(2.25*pht))
+layoutmatrix <- matrix(1:4, nrow = 1, byrow = TRUE)
+thelayout <- layout(layoutmatrix, widths = rep(lcm(2.25*pwd), 4), heights = lcm(2.25*pht))
 ## layout.show(thelayout)
 
 line1 <- -1.1
@@ -164,25 +168,27 @@ set.seed(123)
 lyt <- layout_nicely(g)
 par(mar = rep(0, 4))
 
-draw_spatial_correlation(g, X[nearest, ], layout = lyt)
-mtext("Nearest", line = line1, adj = 0.02, col = 1)
-mtext(paste(round(global_moran(X[nearest, ], A), 3)), line = line2, adj = 0.02, col = 2)
-mtext(paste(round(sd(X[nearest, ]), 3)), line = line3, adj = 0.02, col = 3)
-
-draw_spatial_correlation(g, X[near, ], layout = lyt)
-mtext("Near", line = line1, adj = 0.02, col = 1)
-mtext(paste(round(global_moran(X[near, ], A), 3)), line = line2, adj = 0.02, col = 2)
-mtext(paste(round(sd(X[near, ]), 3)), line = line3, adj = 0.02, col = 3)
+draw_spatial_correlation(g, X[far1, ], layout = lyt)
+mtext("Farthest", line = line1, adj = 0.02, col = 1)
+mtext(paste(round(global_moran(X[far1, ], A), 3)), line = line2, adj = 0.02, col = 2)
+mtext(paste(round(sd(X[far1, ]), 3)), line = line3, adj = 0.02, col = 3)
 
 draw_spatial_correlation(g, X[far2, ], layout = lyt)
 mtext("Far", line = line1, adj = 0.02, col = 1)
 mtext(paste(round(global_moran(X[far2, ], A), 3)), line = line2, adj = 0.02, col = 2)
 mtext(paste(round(sd(X[far2, ]), 3)), line = line3, adj = 0.02, col = 3)
 
-draw_spatial_correlation(g, X[far1, ], layout = lyt)
-mtext("Farthest", line = line1, adj = 0.02, col = 1)
-mtext(paste(round(global_moran(X[far1, ], A), 3)), line = line2, adj = 0.02, col = 2)
-mtext(paste(round(sd(X[far1, ]), 3)), line = line3, adj = 0.02, col = 3)
+draw_spatial_correlation(g, X[near, ], layout = lyt)
+mtext("Near", line = line1, adj = 0.02, col = 1)
+mtext(paste(round(global_moran(X[near, ], A), 3)), line = line2, adj = 0.02, col = 2)
+mtext(paste(round(sd(X[near, ]), 3)), line = line3, adj = 0.02, col = 3)
+
+draw_spatial_correlation(g, X[nearest, ], layout = lyt)
+mtext("Nearest", line = line1, adj = 0.02, col = 1)
+mtext(paste(round(global_moran(X[nearest, ], A), 3)), line = line2, adj = 0.02, col = 2)
+mtext(paste(round(sd(X[nearest, ]), 3)), line = line3, adj = 0.02, col = 3)
+
+if(save_plots) dev.off()
 
 ### color bar
 colorbar <- function(colors, rng, title = "", ...) {
@@ -190,14 +196,31 @@ colorbar <- function(colors, rng, title = "", ...) {
     z <- matrix(1:100, nrow = 1)
     x <- 1
     y <- seq(rng[1], rng[2], length.out = 100)
-    par(mar = c(3, 0, 6, 3.5) + .5)
+                                        ##par(mar = c(3, 0, 6, 3.5) + .5)
+    par(mar = c(0, 12, 0, 12))
     image(x, y, z, col = colors,#crp(100),
           axes = FALSE, xlab = "", ylab = "")
-    eaxis(4, at = pretty(rng), labels = pretty(rng), ...)
+    ##eaxis(4, at = pretty(rng), labels = pretty(rng), ...)
+    eaxis(2, ...)
     mtext(title, 4, line = 2.5)
     box()
 }
-colorbar(hcl.colors(100, "Spectral", rev = TRUE), c(0, 1), cex.axis = 2)
+
+wd <- 4.5*pwd#3.25*pwd
+ht <- 1.5*pwd#2*pht
+if(save_plots) {
+    pdf("./img/example-SIS-up-bottom-colorbars.pdf", height = ht, width = wd)
+} else {
+    dev.new(height = ht, width = wd)
+}
+layoutmatrix <- matrix(1:4, nrow = 1, byrow = TRUE)
+thelayout <- layout(layoutmatrix, widths = rep(lcm(2.25*pwd), 4), heights = lcm(2.25*pht))
+## layout.show(thelayout)
+
+colorbar(hcl.colors(100, "Spectral", rev = TRUE), range(X[far1, ]), cex.axis = 2)
+colorbar(hcl.colors(100, "Spectral", rev = TRUE), range(X[far2, ]), cex.axis = 2)
+colorbar(hcl.colors(100, "Spectral", rev = TRUE), range(X[near, ]), cex.axis = 2)
+colorbar(hcl.colors(100, "Spectral", rev = TRUE), range(X[nearest, ]), cex.axis = 2)
 
 if(save_plots) dev.off()
 

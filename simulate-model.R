@@ -61,10 +61,11 @@ args <- parse_args(
                                         # For debugging
 if(interactive()) {
     args$network <- "drug"
-    args$model <- "SIS" # "doublewell" "genereg" "mutualistic"
+    args$model <- "genereg" # "SIS" "doublewell" "mutualistic"
     args$bparam <- "D" # "u"
-    args$direction <- "up" # "down"
+    args$direction <- "down" # "up"
     ##args$uinit <- -5
+    args$sigma <- 1e-3
 }
 
 library(parallel)

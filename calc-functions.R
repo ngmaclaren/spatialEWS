@@ -27,3 +27,106 @@ local_moran <- function(i, x, A) {
 
 ## check_magnitude <- function() {}
 ## q2 <- function() {}
+
+### Classify the EWS
+basins <- list( ## GLOBAL
+    doublewell = 3,
+    genereg = 5e-3,
+    mutualistic = 1,
+    SIS = 5e-3
+)
+
+promote_df <- function(sim, which = 1) {
+    attribs <- attributes(sim)
+    df <- sim[[which]]
+    attributes(df) <- c(attributes(df), attribs)
+    df
+}
+
+get_idx <- function(df) {
+    direction <- attr(df, "direction")
+    dynamics <- attr(df, "model")
+    basin <- basins[[dynamics]]
+
+    switch(
+        direction,
+        down = which(apply(df, 1, min) > basin),
+        up = which(apply(df, 1, max) < basin)
+    )
+}
+
+get_samples <- function(df, which = c("near", "far"), n = 3) {
+    whichslope <- match.arg(which)
+
+    idx <- get_idx(df)
+
+    switch(
+        whichslope,
+        near = rev(seq(length(idx), by = -1, length.out = n)),
+        far = seq(1, by = 1, length.out = n)
+    )
+}
+
+get_tau <- function(df, EWS, adjust.sign = FALSE) {
+    idx <- get_idx(df)
+    midpoint <- floor(median(idx))
+    idx <- idx[which(idx > midpoint)]
+
+    cparam <- attr(df, "bparam.vals")[idx]
+    ews <- EWS[idx]
+
+    tau <- cor(cparam, ews, method = "kendall")
+
+    if(adjust.sign) {
+        if(attr(df, "direction") == "down") {
+            tau <- -tau
+        }
+    }
+
+    return(tau)
+}
+
+get_slope <- function(df, EWS, which = c("near", "far"), n = 3, return.model = FALSE) {
+    whichslope <- match.arg(which)
+
+    samples <- get_samples(df, whichslope, n)
+
+    cparam <- attr(df, "bparam.vals")[samples]
+    ews <- EWS[samples]
+    m <- lm(ews ~ cparam)
+
+    if(return.model) {
+        return(m)
+    } else {
+        return(as.numeric(coef(m)[2]))
+    }
+}
+
+classify <- function(df, EWS, threshold = 2, n = 3) {
+    firstslope <- get_slope(df, EWS, "far", n = n)
+    secondslope <- get_slope(df, EWS, "near", n = n)
+
+    firstsign <- sign(firstslope)
+    secondsign <- sign(secondslope)
+    ratio <- secondslope/firstslope
+
+    direction <- attr(df, "direction")
+
+    if(direction == "up") {
+        if(sign(firstslope) > 0 & sign(secondslope) > 0 & abs(ratio) > threshold) {
+            return("consistent")
+        } else if(sign(firstslope) < 0 & sign(secondslope) > 0 & abs(ratio) > 0.5*threshold) {
+            return("signswitch")
+        } else {
+            return("bad")
+        }
+    } else { # down
+        if(sign(firstslope) < 0 & sign(secondslope) < 0 & abs(ratio) > threshold) {
+            return("consistent")
+        } else if(sign(firstslope) > 0 & sign(secondslope) < 0 & abs(ratio) > 0.5*threshold) {
+            return("signswitch")
+        } else {
+            return("bad")
+        }
+    }
+}
