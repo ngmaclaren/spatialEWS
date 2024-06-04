@@ -30,10 +30,10 @@ local_moran <- function(i, x, A) {
 
 ### Classify the EWS
 basins <- list( ## GLOBAL
-    doublewell = 3,
-    genereg = 5e-3,
-    mutualistic = 1,
-    SIS = 5e-3
+    doublewell = 3, # separatrix
+    genereg = 0.005, # 5*(noise strength)
+    mutualistic = 1, # Allee constant
+    SIS = 0.005 # 5*(noise strength)
 )
 
 promote_df <- function(sim, which = 1) {
@@ -87,7 +87,7 @@ get_tau <- function(df, EWS, adjust.sign = FALSE) {
 }
 
 get_slope <- function(df, EWS, which = c("near", "far"), n = 3, return.model = FALSE) {
-    whichslope <- match.arg(which)
+    whichslope <- match.arg(which, c("near", "far"))
 
     samples <- get_samples(df, whichslope, n)
 

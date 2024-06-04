@@ -6,7 +6,7 @@ source("calc-functions.R")
 palette("Okabe-Ito")
 ## with(list(n = length(palette())), plot(seq(n), rep(1, n), col = seq(n), cex = 5, pch = 16))
 ## dev.new(width = 14, height = 3); plot(0:24, rep(1, 25), pch = 0:24, cex = 5, col = 1, bg = 2)
-save_plots <- FALSE # TRUE
+save_plots <- TRUE # FALSE
 
                                         # How many samples to use for classification?
 n <- 5
@@ -43,10 +43,10 @@ names(dfs) <- dfnames
 conds <- as.data.frame(cbind(dyns, bparams, directions, nets))
 plotorder <- with(conds, order(dyns, bparams, directions, nets)) # makes it alphabetical. Should specify. Want the double-well type and the transcritical type showing up together.
 
-u.down <- which(grepl("-u-", dfnames, fixed = TRUE) & grepl("-down", dfnames, fixed = TRUE))
-u.up <- which(grepl("-u-", dfnames, fixed = TRUE) & grepl("-up", dfnames, fixed = TRUE))
-D.down <- which(grepl("-D-", dfnames, fixed = TRUE) & grepl("-down", dfnames, fixed = TRUE))
-D.up <- which(grepl("-D-", dfnames, fixed = TRUE) & grepl("-up", dfnames, fixed = TRUE))
+## u.down <- which(grepl("-u-", dfnames, fixed = TRUE) & grepl("-down", dfnames, fixed = TRUE))
+## u.up <- which(grepl("-u-", dfnames, fixed = TRUE) & grepl("-up", dfnames, fixed = TRUE))
+## D.down <- which(grepl("-D-", dfnames, fixed = TRUE) & grepl("-down", dfnames, fixed = TRUE))
+## D.up <- which(grepl("-D-", dfnames, fixed = TRUE) & grepl("-up", dfnames, fixed = TRUE))
 
 ### Spectral reddening as EWS? ###
 ## df <- dfs[[1]]
@@ -65,29 +65,25 @@ moranIs<- mcmapply(
 )
 ssds <- lapply(dfs, function(df) apply(df, 1, sd))
 
-## Now, all the information I need should be with the df
-
-## So, measure the "sign adjusted" tau, where for the down direction we flip the sign of tau so that a positive large tau is always a good thing regardless of the up or down direction.
+                                        # Restart here if adjusting basins                                #####
 taus <- list(
     moranI = mapply(get_tau, dfs, moranIs, TRUE),
     ssd = mapply(get_tau, dfs, ssds, TRUE)
 )
-slopes <- data.frame(
-    ssd.far = mapply(get_slope, dfs, ssds, which = "far", n = n),
-    ssd.near = mapply(get_slope, dfs, ssds, which = "near", n = n),
-    moran.far = mapply(get_slope, dfs, moranIs, which = "far", n = n),
-    moran.near = mapply(get_slope, dfs, moranIs, which = "near", n = n)
-)
-
-        
+## slopes <- data.frame(
+##     ssd.far = mapply(get_slope, dfs, ssds, which = "far", n = n),
+##     ssd.near = mapply(get_slope, dfs, ssds, which = "near", n = n),
+##     moran.far = mapply(get_slope, dfs, moranIs, which = "far", n = n),
+##     moran.near = mapply(get_slope, dfs, moranIs, which = "near", n = n)
+## )
 
 plotdata <- data.frame(
     tau.I = taus$moranI, # these are 'sign-adjusted'
     tau.sd = taus$ssd,
-    slope.far.I = slopes$moran.far,
-    slope.near.I = slopes$moran.near,
-    slope.far.sd = slopes$ssd.far,
-    slope.near.sd = slopes$ssd.near,
+    ## slope.far.I = slopes$moran.far,
+    ## slope.near.I = slopes$moran.near,
+    ## slope.far.sd = slopes$ssd.far,
+    ## slope.near.sd = slopes$ssd.near,
     dynamics = dyns,
     network = nets,
     cparam = bparams,
@@ -147,21 +143,21 @@ if(save_plots) dev.off()
                                         # I think we don't want an absolute value threshold: no way to know in
                                         # advance what scale the slope differences will be on.
 
-diagnostic_plot <- function(df, moranI, ssd, main = "", ...) {
+diagnostic_plot <- function(df, moranI, ssd, n = 3, main = "", ...) {
     cparam.vals <- attr(df, "bparam.vals")
     idx <- get_idx(df)
-    farsample <- get_samples(df, "far")
-    nearsample <- get_samples(df, "near")
+    farsample <- get_samples(df, "far", n = n)
+    nearsample <- get_samples(df, "near", n = n)
 
-    farmodel.moran <- get_slope(df, moranI, "far", return.model = TRUE)
-    farmodel.ssd <- get_slope(df, ssd, "far", return.model = TRUE)
-    nearmodel.moran <- get_slope(df, moranI, "near", return.model = TRUE)
-    nearmodel.ssd <- get_slope(df, ssd, "near", return.model = TRUE)
+    farmodel.moran <- get_slope(df, moranI, "far", n = n, return.model = TRUE)
+    farmodel.ssd <- get_slope(df, ssd, "far", n = n, return.model = TRUE)
+    nearmodel.moran <- get_slope(df, moranI, "near", n = n, return.model = TRUE)
+    nearmodel.ssd <- get_slope(df, ssd, "near", n = n, return.model = TRUE)
 
-    test.moran <- classify(df, moranI)
-    test.ssd <- classify(df, ssd)
+    test.moran <- classify(df, moranI, n = n)
+    test.ssd <- classify(df, ssd, n = n)
 
-    bifplot(df, cparam.vals, col = adjustcolor(1, 0.5), lwd = 0.5, ...)
+    bifplot(df, cparam.vals, col = adjustcolor(1, 0.5), lwd = 0.5, ylim = c(0, 0.02), ...)
 
     mtext("Test results", line = 2, adj = 0, font = 2)
     mtext(paste("Moran's I:", test.moran), line = 1, adj = 0)
@@ -178,26 +174,30 @@ diagnostic_plot <- function(df, moranI, ssd, main = "", ...) {
 
     par(new = TRUE)
     plot(
-        cparam.vals[idx], moranI[idx], type = "l", col = 2, lwd = 2, lty = 1,
+        cparam.vals[idx], moranI[idx], type = "l", col = 2, lwd = 3, lty = 1,
         axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals)
     )
-    lines(cparam.vals[farsample], predict(farmodel.moran), lwd = 2, lty = 2, col = 1)
-    lines(cparam.vals[nearsample], predict(nearmodel.moran), lwd = 2, lty = 2, col = 1)
+    lines(cparam.vals[farsample], predict(farmodel.moran), lwd = 1.5, lty = 1, col = 1)
+    lines(cparam.vals[nearsample], predict(nearmodel.moran), lwd = 1.5, lty = 1, col = 1)
 
     par(new = TRUE)
     plot(
-        cparam.vals[idx], ssd[idx], type = "l", col = 3, lwd = 2, lty = 1,
+        cparam.vals[idx], ssd[idx], type = "l", col = 3, lwd = 3, lty = 1,
         axes = FALSE, xlab = "", ylab = "", xlim = range(cparam.vals)
     )
-    lines(cparam.vals[farsample], predict(farmodel.ssd), lwd = 2, lty = 2, col = 1)
-    lines(cparam.vals[nearsample], predict(nearmodel.ssd), lwd = 2, lty = 2, col = 1)
+    lines(cparam.vals[farsample], predict(farmodel.ssd), lwd = 1.5, lty = 1, col = 1)
+    lines(cparam.vals[nearsample], predict(nearmodel.ssd), lwd = 1.5, lty = 1, col = 1)
 
     legend("bottomright", bty = "n", lwd = 2, col = 2:3, lty = 1,
            legend = c("Moran's I", "Spatial std. dev."))
 }
 
 pdf("./img/diagnostic-plots.pdf")
-mapply(diagnostic_plot, dfs[plotorder], moranIs[plotorder], ssds[plotorder])
+## mapply(diagnostic_plot, dfs[plotorder], moranIs[plotorder], ssds[plotorder], n = n)
+with(
+    list(theseplots = grep("genereg", dfnames)), 
+    mapply(diagnostic_plot, dfs[theseplots], moranIs[theseplots], ssds[theseplots], n = n)
+)
 dev.off()
 
 results <- data.frame(

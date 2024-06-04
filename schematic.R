@@ -5,32 +5,44 @@ library(sdn)
 library(sfsmisc)
 source("calc-functions.R")
 
-dynamics <- "doublewell"
+save_plots <- FALSE # TRUE
 
-g <- make_lattice(length = 10, dim = 2)
+dynamics <- "doublewell"
+direction <- "up"
+network <- "drug"
+bparam <- "u"
+
+sparams <- read.csv("./data/simulation-parameters.csv")
+sparams <- sparams[
+    sparams$dynamics == dynamics & sparams$cparam == bparam &
+    sparams$direction == direction & sparams$network == network
+   , ]
+deltaT <- sparams$deltaT
+
+## g <- make_lattice(length = 10, dim = 2)
+g <- readRDS("./data/networks.rds")[[network]]
 A <- as_adj(g, "both", sparse = FALSE)
 N <- vcount(g)
+n <- 5 # samples from c param
 
 model <- get(dynamics)
 modelparams <- .doublewell
 lmax <- 100
-deltaT <- 0.01
 
-bparam <- "u"
-xinit <- rep(modelparams$xinit.high, N)
+xinit <- rep(modelparams$xinit.low, N)
 
 params <- c(modelparams, list(A = A))
 control <- list(ncores = ncores, times = 0:50, deltaT = deltaT)
 
-rng <- seq(0, -5, length.out = lmax)
+rng <- seq(sparams$rng.far, sparams$rng.near, length.out = lmax)
 
 df <- solve_in_range(rng, bparam, model, xinit, params, control, "sde")
 attr(df, "model") <- dynamics
-attr(df, "network") <- "squarelattice"
+attr(df, "network") <- network
 attr(df, "simkind") <- "sde"
-attr(df, "simtime") <- 0:50
+attr(df, "simtime") <- control$times
 attr(df, "bparam") <- bparam
-attr(df, "direction") <- "down"
+attr(df, "direction") <- direction
 attr(df, "bparam.vals") <- rng
 attr(df, "params") <- params
 attr(df, "control") <- control
@@ -65,18 +77,25 @@ tests <- list(
 idx <- get_idx(df)
 
 palette("Okabe-Ito")
-dev.new(width = 15, height = 5)
+labelsize <- 2
+
+if(save_plots) {
+    pdf("./img/methods-fig-panels.pdf", width = 15, height = 5)
+} else {
+    dev.new(width = 15, height = 5)
+}
 par(mfrow = c(1, 3))
-bifplot(df, rng, col = 9, axes = FALSE)
-eaxis(1)
-eaxis(2)
-plot(rng[idx], moranI[idx], xlim = range(rng), axes = FALSE, col = 2, type = "l")
-lines(rng[farsample], predict(slopes$moran$far), lwd = 2, lty = 2, col = 1)
-lines(rng[nearsample], predict(slopes$moran$near), lwd = 2, lty = 2, col = 1)
-eaxis(1)
-eaxis(2)
-plot(rng[idx], ssd[idx], xlim = range(rng), axes = FALSE, col = 3, type = "l")
-lines(rng[farsample], predict(slopes$ssd$far), lwd = 2, lty = 2, col = 1)
-lines(rng[nearsample], predict(slopes$ssd$near), lwd = 2, lty = 2, col = 1)
-eaxis(1)
-eaxis(2)
+bifplot(df, rng, col = 9, axes = FALSE, lwd = 0.5)
+eaxis(1, cex.axis = labelsize)
+eaxis(2, cex.axis = labelsize)
+plot(rng[idx], moranI[idx], xlim = range(rng), axes = FALSE, col = 2, type = "l", xlab = "", ylab = "")
+lines(rng[farsample], predict(slopes$moran$far), lwd = 2, lty = 1, col = 1)
+lines(rng[nearsample], predict(slopes$moran$near), lwd = 2, lty = 1, col = 1)
+eaxis(1, cex.axis = labelsize)
+eaxis(2, cex.axis = labelsize)
+plot(rng[idx], ssd[idx], xlim = range(rng), axes = FALSE, col = 3, type = "l", xlab = "", ylab = "")
+lines(rng[farsample], predict(slopes$ssd$far), lwd = 2, lty = 1, col = 1)
+lines(rng[nearsample], predict(slopes$ssd$near), lwd = 2, lty = 1, col = 1)
+eaxis(1, cex.axis = labelsize)
+eaxis(2, cex.axis = labelsize)
+if(save_plots) dev.off()
