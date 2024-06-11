@@ -12,7 +12,7 @@
 library(sfsmisc)
 library(sdn)
 source("calc-functions.R")
-save_plots <- TRUE # FALSE
+save_plots <- FALSE # TRUE
 palette("Okabe-Ito")
 
 plotit <- function(sim, col.xi = 9, col.ssd = 3, pad.ssd = NULL, labelsize = NULL, ...) {
@@ -106,8 +106,6 @@ mapply(function(sim, ylim, xlim) plotit(sim, ylim = ylim, xlim = xlim), sims, yl
 if(save_plots) dev.off()
 
 
-
-
 moran_components <- function(x, A) {
     N <- length(x)
     stopifnot(N == nrow(A))
@@ -131,43 +129,81 @@ get_moran_components <- function(sim) {
     t(apply(df, 1, moran_components, A = A)[, idx])
 }
 
-with(list(df = promote_df(sims$dw.uu)), apply(df, 1, moran_components, A = A))
 
-get_moran_components(sims$dw.uu)
+## with(list(df = promote_df(sims$dw.uu)), apply(df, 1, moran_components, A = A))
+## get_moran_components(sims$dw.uu)
 
-plot_moran_components <- function(sim) {
-    df <- promote_df(sim)
-    mc <- get_moran_components(sim)
-    bpv <- attr(df, "bparam.vals")
-    idx <- get_idx(df)
-
-    matplot(bpv[idx], mc, col = c("#f6d32d", "#9141ac"),
-            type = "l", lty = 1, lwd = 2,
-            xlim = range(bpv),
-            xlab = "Control parameter", ylab = "")
-    legend("bottomright", bty = "n", col = c("#f6d32d", "#9141ac"), lty = 1, lwd = 2,
-           legend = c("Numerator", "Denominator"))
-}
-
-moranIs <- lapply(sims, function(sim) {
+plot_moran_components <- function(sim, labelsize = 2) {
     g <- readRDS("./data/networks.rds")$drug
     A <- igraph::as_adj(g, "both", sparse = FALSE)
-    df <- promote_df(sim)
-    apply(df, 1, global_moran, A = A)
-})
-ssds <- lapply(sims, function(sim) {
-    df <- promote_df(sim)
-    apply(df, 1, sd)
-})
 
-mapply(function(sim, EWS) classify(promote_df(sim), EWS, n = 5), sims, moranIs)
-mapply(function(sim, EWS) classify(promote_df(sim), EWS, n = 5), sims, ssds)
+    df <- promote_df(sim)
 
+    mc <- get_moran_components(sim)
+    mI <- apply(df, 1, global_moran, A = A)
+    bpv <- attr(df, "bparam.vals")
+    
+    idx <- get_idx(df)
+
+    Icol <- 2
+    numcol <- 4
+    denomcol <- 6
+
+    par(mar = rep(4.75, 4))
+    matplot(bpv[idx], mc, col = c(numcol, denomcol),
+            type = "l", lty = 1, lwd = 2,
+            xlim = range(bpv),
+            xlab = attr(df, "bparam"), ylab = "", axes = FALSE, cex.lab = labelsize)
+    eaxis(1, cex.axis = 0.75*labelsize)
+    eaxis(2, cex.axis = 0.75*labelsize)
+
+    par(new = TRUE)
+    plot(
+        bpv[idx], mI[idx], type = "l", col = Icol, lwd = 2,
+        xlim = range(bpv),# ylim = c(-0.75, 0.75),
+        xlab = "", ylab = "", axes = FALSE
+    )
+    eaxis(4, cex.axis = 0.75*labelsize)
+    
+    legend("topleft", bty = "n", col = c(Icol, numcol, denomcol), lty = 1, lwd = 2,
+           legend = c("Moran's I", "Numerator", "Denominator"))
+    ##mtext(classify(df, mI, n = 5))
+}
+
+## moranIs <- lapply(sims, function(sim) {
+##     g <- readRDS("./data/networks.rds")$drug
+##     A <- igraph::as_adj(g, "both", sparse = FALSE)
+##     df <- promote_df(sim)
+##     apply(df, 1, global_moran, A = A)
+## })
+## ssds <- lapply(sims, function(sim) {
+##     df <- promote_df(sim)
+##     apply(df, 1, sd)
+## })
+
+## mapply(function(sim, EWS) classify(promote_df(sim), EWS, n = 5), sims, moranIs)
+## mapply(function(sim, EWS) classify(promote_df(sim), EWS, n = 5), sims, ssds)
+
+if(save_plots) {
+    pdf("./img/example-moran.pdf", height = ht, width = wd)
+} else {
+    dev.new(height = ht, width = wd)
+}
+par(mfrow = c(2, 3))
+## mapply(
+##     function(sim, moranI) {
+##         plot_moran_components(sim)
+##         bpv <- attr(sim, "bparam.vals")
+##         idx <- get_idx(promote_df(sim))
+##         par(new = TRUE)
+##         plot(bpv[idx], moranI[idx], type = "l", xlim = range(bpv), xlab = "", ylab = "", axes = FALSE, col = 2)
+##         mtext(classify(promote_df(sim), moranI, n = 5))
+##     }, sims, moranIs
+## )
 lapply(sims, function(sim) {
-    dev.new()
     plot_moran_components(sim)
 })
-
+if(save_plots) dev.off()
 ## pht <- pwd <- 5
 ## wd <- 3*pwd
 ## ht <- 2*pwd

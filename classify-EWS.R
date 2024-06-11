@@ -6,7 +6,7 @@ source("calc-functions.R")
 palette("Okabe-Ito")
 ## with(list(n = length(palette())), plot(seq(n), rep(1, n), col = seq(n), cex = 5, pch = 16))
 ## dev.new(width = 14, height = 3); plot(0:24, rep(1, 25), pch = 0:24, cex = 5, col = 1, bg = 2)
-save_plots <- TRUE # FALSE
+save_plots <- FALSE # TRUE
 
                                         # How many samples to use for classification?
 n <- 5
@@ -96,7 +96,7 @@ plotdata$cparam <- factor(plotdata$cparam)
 plotdata$direction <- factor(plotdata$direction)
 
 ## then maybe a strip plot by qualitative var
-## Color by EWS  #### START HERE: separate more. Within a dynamics, four cols: I D, SD D, I u, SD u
+## Color by EWS  #### START HERE: separate more. Within a dynamics, four rows: I D, SD D, I u, SD u
 ht <- 5; wd <- 12
 if(save_plots) {
     pdf("./img/tauplot.pdf", height = ht, width = wd)

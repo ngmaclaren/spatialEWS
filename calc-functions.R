@@ -32,8 +32,10 @@ local_moran <- function(i, x, A) {
 basins <- list( ## GLOBAL
     doublewell = 3, # separatrix
     genereg = 0.005, # 5*(noise strength)
+    ## genereg = 0.01, # 10*sigma: too large
     mutualistic = 1, # Allee constant
     SIS = 0.005 # 5*(noise strength)
+    ## SIS = 0.01 # 10*sigma: too large
 )
 
 promote_df <- function(sim, which = 1) {
@@ -50,8 +52,9 @@ get_idx <- function(df) {
 
     switch(
         direction,
+        ## These are correct: if the test is "as or more extreme than" then the basin limit is the first value in the new regime. This idx is the indices of all cparam vals in the orignial regime. 
         down = which(apply(df, 1, min) > basin),
-        up = which(apply(df, 1, max) < basin)
+        up = which(apply(df, 1, max) < basin) 
     )
 }
 
