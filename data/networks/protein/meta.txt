@@ -1,7 +1,0 @@
-https://networks.skewed.de/net/interactome_pdz
-
-A network of PDZ-domain-mediated protein–protein binding interactions, extracted from the PDZBase database. Nodes represent proteins and an edge represents a binding interaction between two proteins.
-
-T. Beuming et al. "PDZBase: a protein–protein interaction database for PDZ-domains." Bioinformatics 21.6, 827-828. (2005)., https://doi.org/10.1093/bioinformatics/bti098
-
-http://konect.cc/networks/maayan-pdzbase

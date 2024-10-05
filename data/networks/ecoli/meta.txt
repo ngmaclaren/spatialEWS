@@ -1,7 +1,0 @@
-https://networks.skewed.de/net/ecoli_transcription
-
-Network of operons and their pairwise interactions, via transcription factor-based regulation, within the bacteria Escherichia coli
-
-Shen-Orr et. al, "Network motifs in the transcriptional regulation network of Escherichia coli." Nature Genetics 31, 64-68 (2002)., https://doi.org/10.1038/ng881
-
-http://www.weizmann.ac.il/mcb/UriAlon/e-coli-transcription-network

@@ -1,7 +1,0 @@
-https://networks.skewed.de/net/adjnoun
-
-A network of word adjacencies of common adjectives and nouns in the novel "David Copperfield" by Charles Dickens.
-
-M.E.J. Newman, "Finding community structure in networks using the eigenvectors of matrices." Phys. Rev. E 74, 036104 (2006)., https://doi.org/10.1103/PhysRevE.74.036104
-
-http://www-personal.umich.edu/~mejn/netdata/adjnoun.zip

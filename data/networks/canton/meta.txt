@@ -1,7 +1,0 @@
-https://networks.skewed.de/net/fresh_webs
-
-A set of 26 networks of trophic-level species interactions in streams in New Zealand, Maine and North Carolina. Networks include the identities of aquatic insect, algae and fish species and their trophic interactions. Excel and plain text adjacency matrices available; webs can be downloaded individually or as a group
-
-R.M. Thompson and C.R. Townsend, "Impacts on stream food webs of native and exotic forest: an intercontinental comparison." Ecology 84, 145-161 (2003)., https://doi.org/10.1890/0012-9658(2003)084[0145:iosfwo]2.0.co;2
-
-https://iwdb.nceas.ucsb.edu/html/thomps_towns.html
