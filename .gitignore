@@ -13,7 +13,7 @@ data/add-gkk.R
 docs/
 img/
 old/
-data/networks/
+# data/networks/
 data/sims/
 outfiles/
 tex/
