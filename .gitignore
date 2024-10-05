@@ -5,6 +5,9 @@
 
 # Specific files
 fromUBcluster-spatialEWS.txt
+# data/networks.rds
+# data/nets-for-git.R
+# data/add-gkk.R
 
 # Directories
 docs/

@@ -1,6 +1,21 @@
-# early-warnings-spatial
+# spatialEWS
 
 Assessment of spatial early warning signals. 
+
+Note that for copyright purposes we are not making all networks available in this repository---the networks can be downloaded from their original sources or by contacting me. EWS data for making figures etc. is in `./data/EWS-data.RData`. This `.RData` file contains the computed early warning signals from each simulation. The files to produce raw version of manuscript figures 1, 2, 4, 5, and S1 are provided:
+- Figure 1: `example-method.R`
+- Figure 2: `tauplot.R`
+- Figure 4: `example-drug.R`
+- Figure 5: `example-drug.R`
+- Figure S1: `example-lattice.R`
+Create a subdirectory in your local clone called `./img/` before running those files. 
+
+## Conducting simulations
+
+The base file that performs a sequence of simulations with a given set of parameters is `simulate-model.R`. This file relies on a separate package which can be found [here](https://github.com/ngmaclaren/sdn). 
+
+- `add-gkk.R` is a script that does all ten simulation sequences for one network (in this case, the GKK network) on a local machine using parameters stored in `data/simulation-parameters.csv`. 
+- The scripts `individual-request.sh`, `request-simulation.sh`, and `build-simulation-request.sh` are intended for use on a high-performance computing cluster. As written, they are designed for the Slurm workload manager as implemented for a particular computing cluster and may need modification to work in a different environment. 
 
 ## Workflow
 
