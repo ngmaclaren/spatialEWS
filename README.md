@@ -1,6 +1,6 @@
 # spatialEWS
 
-Assessment of spatial early warning signals. 
+This repository contains code and selected data files in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The repository is a work in progress: please be patient.
 
 Note that for copyright purposes we are not making all networks available in this repository---the networks can be downloaded from their original sources or by contacting me. EWS data for making figures etc. is in `./data/EWS-data.RData`. This `.RData` file contains the computed early warning signals from each simulation. The files to produce raw version of manuscript figures 1, 2, 4, 5, and S1 are provided:
 - Figure 1: `example-method.R`
