@@ -1,4 +1,4 @@
-                                        # Generates the raw data for Fig 1
+                                        # Generates the raw data for Fig 6
 
 ### Use the stored BA network sims
 ### Use u as the bifurcation parameter

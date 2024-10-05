@@ -10,6 +10,18 @@ Note that for copyright purposes we are not making all networks available in thi
 - Figure S1: `example-lattice.R`
 Create a subdirectory in your local clone called `./img/` before running those files. 
 
+## Computing early warning signals
+
+Our implementation of computing Moran's I is in `calc-functions.R`. To compute early warning signals, produce a data matrix in which each column corresponds to a network node and each row corresponds to a control parameter value. Then, if such a matrix is called `X`,
+
+```R
+source("calc-functions.R") # for global_moran()
+apply(X, 1, global_moran, A = A)
+apply(X, 1, sd)
+apply(X, 1, moments::skewness)
+apply(X, 1, moments::kurtosis)
+```
+
 ## Conducting simulations
 
 The base file that performs a sequence of simulations with a given set of parameters is `simulate-model.R`. This file relies on a separate package which can be found [here](https://github.com/ngmaclaren/sdn). 

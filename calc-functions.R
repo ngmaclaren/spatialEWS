@@ -9,21 +9,6 @@ global_moran <- function(x, A) {
     (N/W)*sum(A*outer(x, x))/sum(x^2)
 }
 
-                                        # We do not currently use this function.
-                                        # Leaving in place in case we decide to do something with local Moran.
-local_moran <- function(i, x, A) {
-                                        # this is too large by exactly the mean degree
-                                        # Wikipedia says I = sum(I/N) but I get I = mean(k)*sum(I/N)
-    N <- length(x)
-    stopifnot(N == nrow(A))
-    stopifnot(nrow(A) == ncol(A))
-    x <- as.numeric(x)
-    x <- x - mean(x)
-
-    m2 <- sum(x^2)/N
-    (x[i]/m2)*sum(A[i, ]*x)
-}
-
 ### Classify the EWS
 basins <- list( ## GLOBAL
     doublewell = 3, # separatrix
