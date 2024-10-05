@@ -379,3 +379,13 @@ genereg,D,down,ug_village,1,0.2,0.01,
 genereg,u,down,ug_village,0,-0.5,0.01,
 SIS,D,down,ug_village,1,0,0.01,
 SIS,D,up,ug_village,0,0.2,0.01,
+doublewell,D,down,gkk,1,0.3,0.01,
+doublewell,u,down,gkk,0,-3.5,0.01,0.025
+doublewell,D,up,gkk,0,0.05,0.01,
+doublewell,u,up,gkk,0,1.5,0.01,0.025
+mutualistic,D,down,gkk,1.5,0.9,0.01,
+mutualistic,u,down,gkk,0,-3,0.01,0.05
+genereg,D,down,gkk,1.5,1,0.01,
+genereg,u,down,gkk,0,-0.5,0.01,
+SIS,D,down,gkk,1,0,0.01,
+SIS,D,up,gkk,0,0.1,0.01,

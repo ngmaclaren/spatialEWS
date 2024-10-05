@@ -7,7 +7,7 @@ bparams=("D" "u")
 directions=("up" "down")
 
 # standard parameter(s)
-ntrials=1 # 50
+ntrials=1
 
 # for distinguishing job names
 counter=1
@@ -41,6 +41,7 @@ for network in ${networks[@]}; do
 		fi
 
 		jobname=${network}-${model}-${bparam}-${direction}
+		## For debugging:
 		# echo ${jobname}
 		# echo ${counter}
 

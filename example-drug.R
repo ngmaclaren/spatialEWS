@@ -63,9 +63,22 @@ plotit <- function(sim, col.xi = 9, col.ssd = 3, pad.ssd = NULL, labelsize = NUL
         col = col.ssd, lty = 1, lwd = 4
     )
 
+    sds <- apply(mark.X, 1, sd)
+    skews <- apply(mark.X, 1, moments::skewness)
+    if(attr(X, "direction") == "down") skews <- -skews
+
+    allsd <- apply(X, 1, sd)
+    allskew <- apply(X, 1, moments::skewness)
+    if(attr(X, "direction") == "down") allskew <- -allskew
+    mtext(tools::toTitleCase(classify(X, allsd, n = 5)), col = col.ssd, line = -1)
+    mtext(tools::toTitleCase(classify(X, allskew, n = 5)), col = col.ssd+1, line = -3)
+
+    
     cat("\n", paste(dynamics, direction, attr(X, "bparam")),
         "\nControl parameter values:\n", mark.bpv,
-        "\nSpatial standard deviation:\n", apply(mark.X, 1, sd), "\n"
+        "\nSpatial standard deviation:\n", sds,
+        "\nSpatial skewness:\n", skews,
+        "\n"
         )
 }
 
@@ -96,7 +109,7 @@ xlims$SIS.Dd <- c(0, 1)
     
 
 if(save_plots) {
-    pdf("./img/example-drug.pdf", height = ht, width = wd)
+    pdf("./img/example-drug-input.pdf", height = ht, width = wd)
 } else {
     dev.new(height = ht, width = wd)
 }
@@ -146,14 +159,14 @@ plot_moran_components <- function(sim, labelsize = 2) {
     idx <- get_idx(df)
 
     Icol <- 2
-    numcol <- 4
-    denomcol <- 6
+    numcol <- 6
+    denomcol <- 7
 
     par(mar = rep(4.75, 4))
     matplot(bpv[idx], mc, col = c(numcol, denomcol),
             type = "l", lty = 1, lwd = 2,
             xlim = range(bpv),
-            xlab = attr(df, "bparam"), ylab = "", axes = FALSE, cex.lab = labelsize)
+            xlab = attr(df, "bparam"), ylab = "Variance", axes = FALSE, cex.lab = labelsize)
     eaxis(1, cex.axis = 0.75*labelsize)
     eaxis(2, cex.axis = 0.75*labelsize)
 
@@ -163,228 +176,20 @@ plot_moran_components <- function(sim, labelsize = 2) {
         xlim = range(bpv),# ylim = c(-0.75, 0.75),
         xlab = "", ylab = "", axes = FALSE
     )
-    eaxis(4, cex.axis = 0.75*labelsize)
+    eaxis(4, cex.axis = 0.75*labelsize, col = Icol, col.axis = Icol, small.args = list(col = Icol))
     
     legend("topleft", bty = "n", col = c(Icol, numcol, denomcol), lty = 1, lwd = 2,
            legend = c("Moran's I", "Numerator", "Denominator"))
-    ##mtext(classify(df, mI, n = 5))
+    mtext(tools::toTitleCase(classify(df, mI, n = 5)))
 }
 
-## moranIs <- lapply(sims, function(sim) {
-##     g <- readRDS("./data/networks.rds")$drug
-##     A <- igraph::as_adj(g, "both", sparse = FALSE)
-##     df <- promote_df(sim)
-##     apply(df, 1, global_moran, A = A)
-## })
-## ssds <- lapply(sims, function(sim) {
-##     df <- promote_df(sim)
-##     apply(df, 1, sd)
-## })
-
-## mapply(function(sim, EWS) classify(promote_df(sim), EWS, n = 5), sims, moranIs)
-## mapply(function(sim, EWS) classify(promote_df(sim), EWS, n = 5), sims, ssds)
-
 if(save_plots) {
-    pdf("./img/example-moran.pdf", height = ht, width = wd)
+    pdf("./img/example-moran-input.pdf", height = ht, width = wd)
 } else {
     dev.new(height = ht, width = wd)
 }
 par(mfrow = c(2, 3))
-## mapply(
-##     function(sim, moranI) {
-##         plot_moran_components(sim)
-##         bpv <- attr(sim, "bparam.vals")
-##         idx <- get_idx(promote_df(sim))
-##         par(new = TRUE)
-##         plot(bpv[idx], moranI[idx], type = "l", xlim = range(bpv), xlab = "", ylab = "", axes = FALSE, col = 2)
-##         mtext(classify(promote_df(sim), moranI, n = 5))
-##     }, sims, moranIs
-## )
 lapply(sims, function(sim) {
     plot_moran_components(sim)
 })
 if(save_plots) dev.off()
-## pht <- pwd <- 5
-## wd <- 3*pwd
-## ht <- 2*pwd
-## if(save_plots) {
-##     pdf("./img/example-dw-v3.pdf", height = ht, width = wd)
-## } else {
-##     dev.new(height = ht, width = wd)
-## }
-## lyt <- layout(
-##     matrix(c(
-##         1, 1, 2, 2, 3, 3,
-##         1, 1, 2, 2, 3, 3,
-##         4, 4, 5, 5, 6, 6,
-##         4, 4, 5, 5, 7, 7),
-##         byrow = TRUE, nrow = 4, ncol = 6
-##         ), 
-## )
-## ##layout.show(7)
-## plotit(dw.ud, ylim = c(4, 5.5)) # 1
-## plotit(dw.uu, ylim = c(0.5, 3)) # 3
-## plotit(dw.Du, ylim = c(0.5, 3)) # 2
-## plotit(dw.Dd, ylim = c(3.5, 8.5)) # 4
-## plotit(lat.Dd, ylim = c(4, 6.5)) # 5
-## bracket <- c(-0.2, 0.2)
-## plotit(lat.Dd, ylim = 6.1 + bracket, xlim = 0.91 + 2*0.1*bracket) # 6
-## plotit(lat.Dd, ylim = 4.5 + bracket, xlim = 0.14 + 2*0.1*bracket) # 7
-## if(save_plots) dev.off()
-
-#### old code below here ####
-
-## ht <- 15
-## wd <- 15
-## if(save_plots) {
-##     pdf("./img/example-dw.pdf", height = ht, width = wd)
-## } else { 
-##     dev.new(height = ht, width = wd)
-## }
-## par(mfrow = c(2, 2), mai = c(1, 1, 0.1, 0.1))
-## with(
-##     list(
-##         X = dw.Dd[[1]],
-##         D = attr(dw.Dd, "bparam.vals")
-##     ), {
-##         mins <- apply(X, 1, min)
-##         far1 <- 10
-##         far2 <- 35
-##         nearest <- which(mins < 3)[1] - 1
-##         near <- nearest - 3
-##                                         # marking lines; will need the SSDs for these lines
-##         markD <- D[c(far1, far2, near, nearest)]
-##         markX <- X[c(far1, far2, near, nearest), ]
-##         print(apply(markX, 1, sd))
-##                                         # plot        
-##         matplot(
-##             D, X, type = "l", lty = 1, lwd = 0.5, col = 9,
-##             ylim = c(3.5, 8.5), xlab = "D", ylab = expression(x[i]), axes = FALSE, font.lab = 3, cex.lab = 2
-##         )
-##         axis(1, cex.axis = 2)
-##         axis(2, cex.axis = 2)
-##         segments(
-##             x0 = markD,
-##             y0 = apply(markX, 1, min) - 0.1,
-##             y1 = apply(markX, 1, max) + 0.1,
-##             col = 3, lty = 1, lwd = 4
-##         )
-##     }
-## )
-## with(
-##     list(
-##         X = dw.ud[[1]],
-##         u = attr(dw.ud, "bparam.vals")
-##     ), {
-##         mins <- apply(X, 1, min)
-##         far1 <- 10
-##         far2 <- 35
-##         nearest <- which(mins < 3)[1] - 1
-##         near <- nearest - 3
-##                                         # marking lines; will need the SSDs for these lines
-##         marku <- u[c(far1, far2, near, nearest)]
-##         markX <- X[c(far1, far2, near, nearest), ]
-##         print(apply(markX, 1, sd))
-##                                         # plot
-##         matplot(
-##             u, X, type = "l", lty = 1, lwd = 0.5, col = 9,
-##             ylim = c(4, 5.5), xlab = "u", ylab = "", axes = FALSE, font.lab = 3, cex.lab = 2
-##         )
-##         axis(1, cex.axis = 2)
-##         axis(2, cex.axis = 2)
-##         segments(
-##             x0 = marku,
-##             y0 = apply(markX, 1, min) - 0.05,
-##             y1 = apply(markX, 1, max) + 0.05,
-##             col = 3, lty = 1, lwd = 4
-##         )
-##     }
-## )
-## with(
-##     list(
-##         X = dw.Du[[1]],
-##         D = attr(dw.Du, "bparam.vals")
-##     ), {
-##         maxs <- apply(X, 1, max)
-##         far1 <- 10
-##         far2 <- 35
-##         nearest <- which(maxs < 3)
-##         nearest <- nearest[length(nearest)]
-##         near <- nearest - 3
-##                                         # marking lines; will need the SSDs for these lines
-##         markD <- D[c(far1, far2, near, nearest)]
-##         markX <- X[c(far1, far2, near, nearest), ]
-##         print(apply(markX, 1, sd))
-##                                         # plot        
-##         matplot(
-##             D, X, type = "l", lty = 1, lwd = 0.5, col = 9,
-##             ylim = c(0.5, 3), xlim = c(0, 0.15),
-##             xlab = "D", ylab = expression(x[i]), axes = FALSE, font.lab = 3, cex.lab = 2
-##         )
-##         axis(1, cex.axis = 2)
-##         axis(2, cex.axis = 2)
-##         segments(
-##             x0 = markD,
-##             y0 = apply(markX, 1, min) - 0.1,
-##             y1 = apply(markX, 1, max) + 0.1,
-##             col = 3, lty = 1, lwd = 4
-##         )
-##     }
-## )
-## with(
-##     list(
-##         X = dw.uu[[1]],
-##         u = attr(dw.uu, "bparam.vals")
-##     ), {
-##         maxs <- apply(X, 1, max)
-##         far1 <- 10
-##         far2 <- 35
-##         nearest <- which(maxs < 3)
-##         nearest <- nearest[length(nearest)]
-##         near <- nearest - 3
-##                                         # marking lines; will need the SSDs for these lines
-##         marku <- u[c(far1, far2, near, nearest)]
-##         markX <- X[c(far1, far2, near, nearest), ]
-##         print(apply(markX, 1, sd))
-##                                         # plot
-##         matplot(
-##             u, X, type = "l", lty = 1, lwd = 0.5, col = 9,
-##             ylim = c(0.5, 3), xlab = "u", ylab = "", axes = FALSE, font.lab = 3, cex.lab = 2
-##         )
-##         axis(1, cex.axis = 2)
-##         axis(2, cex.axis = 2)
-##         segments(
-##             x0 = marku,
-##             y0 = apply(markX, 1, min) - 0.05,
-##             y1 = apply(markX, 1, max) + 0.05,
-##             col = 3, lty = 1, lwd = 4
-##         )
-##     }
-## )
-## if(save_plots) dev.off()
-
-## ht <- 7.5
-## wd <- ht*3
-## if(save_plots) {
-##     pdf("./img/example-lattice-dw-D.pdf", height = ht, width = wd)
-## } else {
-##     dev.new(height = ht, width = wd)
-## }
-## test <- readRDS("./data/sims/doublewell-lattice-D-sde-50-down--5-1-TRUE.rds")
-## par(mfrow = c(1, 3), mai = c(1, 1, 0.1, 0.1))
-## matplot(attr(test, "bparam.vals"), test[[1]], type = "l", lty = 1, col = 9, lwd = 0.5,
-##         ylim = c(4, 6.5), xlab = "D", ylab = expression(x[i]),
-##         axes = FALSE, cex.lab = 2)
-## axis(1, cex.axis = 2)
-## axis(2, cex.axis = 2)
-## matplot(attr(test, "bparam.vals"), test[[1]], type = "l", lty = 1, col = 9, lwd = 0.5,
-##         xlim = c(0.12, 0.15), ylim = c(4.3, 4.7), xlab = "D", ylab = expression(x[i]),
-##         axes = FALSE, cex.lab = 2)
-## axis(1, cex.axis = 2)
-## axis(2, cex.axis = 2)
-## matplot(attr(test, "bparam.vals"),  test[[1]], type = "l", lty = 1, col = 9, lwd = 0.5,
-##         xlim = c(0.88, 0.91), ylim = c(5.85, 6.25), xlab = "D", ylab = expression(x[i]),
-##         axes = FALSE, cex.lab = 2)
-## axis(1, cex.axis = 2)
-## axis(2, cex.axis = 2)
-## if(save_plots) dev.off()

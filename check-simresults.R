@@ -1,3 +1,6 @@
+                                        # File for examining the results of the simulations. For debugging,
+                                        # determining thresholds, etc.
+
 library(igraph)
 library(sdn)
 

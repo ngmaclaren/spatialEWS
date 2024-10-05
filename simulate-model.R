@@ -60,12 +60,12 @@ args <- parse_args(
 
                                         # For debugging
 if(interactive()) {
-    args$network <- "drug"
-    args$model <- "genereg" # "SIS" "doublewell" "mutualistic"
+    args$network <- "gkk"
+    args$model <- "SIS" # "genereg" "SIS" "doublewell" "mutualistic"
     args$bparam <- "D" # "u"
     args$direction <- "down" # "up"
-    ##args$uinit <- -5
-    args$sigma <- 1e-3
+    ## args$uinit <- -5
+    ##args$sigma <- 1e-3
 }
 
 library(parallel)
@@ -79,7 +79,7 @@ networks <- readRDS("./data/networks.rds")
 ## savedir <- "/projects/academic/naokimas/neil/spatialEWS/"
 savedir <- "./data/sims/" # adjust to check for the existence of ./data/sims
 filetag <- paste(unlist(args)[-which(unlist(args) %in% c("NaN", "FALSE"))], collapse = "-")
-print(filetag)
+print(filetag)#; q(save = "no") # for debugging
 
 ## source("functions.R")
 ## load(paste0("./data/", args$network, ".rda")) # should convert to .rds at some point
@@ -91,8 +91,8 @@ N <- vcount(g)
 
 model <- get(args$model)
 modelparams <- get(paste0(".", args$model))
-lmax <- 100 # expose this
-deltaT <- 0.01 # expose this
+lmax <- 100 # expose this (low priority)
+deltaT <- 0.01 # expose this (low priority)
 
 
                                         # if use defaults, sb flag default true
@@ -131,18 +131,6 @@ if(is.finite(args$sigma)) modelparams$sigma <- args$sigma
 if(is.finite(args$uinit)) modelparams$u <- args$uinit
 if(is.finite(args$Dinit)) modelparams$D <- args$Dinit
 
-
-##                                         # Set params from the separate file here
-## refparams <- read.csv("./data/cparam-values.csv")
-## rowfilter <- refparams$model == args$model & refparams$cparam == args$bparam & refparams$direction == args$direction
-## farlim <- refparams$farlim[rowfilter]
-## biflim <- refparams$biflim[rowfilter]
-## if(args$bparam == "D") {
-##     modelparams$Ds <- seq(farlim, biflim, length.out = lmax)
-## } else {
-##     modelparams$us <- seq(farlim, biflim, length.out = lmax)
-## }
-
 params <- c(modelparams, list(A = A))
 control <- list(ncores = ncores, times = 0:args$simtime, deltaT = deltaT)
 if(args$model %in% c("SIS", "mutualistic", "genereg")) {
@@ -151,23 +139,21 @@ if(args$model %in% c("SIS", "mutualistic", "genereg")) {
 
 rng <- switch(
     args$bparam,
-    ## D = switch(args$direction, up = modelparams$Ds.up, down = modelparams$Ds.down),
     D = params$Ds,
-    ## u = switch(args$direction, up = modelparams$us.up, down = modelparams$us.down)
     u = params$us    
 )
 
                                         # Debugging
-## if(interactive()) { # system.time() won't print to stdout like this---run each line individually, or paste somewhere else
-##     system.time(X <- sde(xinit, control$times, model, params, control))
-##     system.time(result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind))
-##     rowMeans(result)
-##     ## result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind)
-##     pdf(paste0(filetag, "-bifplot.pdf"))
-##     bifplot(result, rng, col = 1)
-##     abline(h = 0, col = 2)
-##     dev.off()
-## }
+if(interactive()) { # system.time() won't print to stdout like this---run each line individually, or paste somewhere else
+    ## system.time(X <- sde(xinit, control$times, model, params, control))
+    system.time(result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind))
+    ## rowMeans(result)
+    result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind)
+    ## pdf(paste0(filetag, "-bifplot.pdf"))
+    bifplot(result, rng, col = 1, ylim = c(0, 0.1))
+    abline(h = 0, col = 2)
+    ## dev.off()
+}
 
 
                                         # Main simulations

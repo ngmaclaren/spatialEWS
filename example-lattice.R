@@ -4,10 +4,15 @@ source("calc-functions.R")
 save_plots <- FALSE # TRUE
 palette("Okabe-Ito")
 
-dw.Dd <- readRDS("./data/sims/doublewell-drug-D-sde-50-down--5-1-TRUE.rds")
-dw.Du <- readRDS("./data/sims/doublewell-drug-D-sde-50-up-0-1-TRUE.rds")
+## dw.Dd <- readRDS("./data/sims/doublewell-drug-D-sde-50-down--5-1-TRUE.rds")
+## dw.Du <- readRDS("./data/sims/doublewell-drug-D-sde-50-up-0-1-TRUE.rds")
+## dw.Dd <- readRDS("./data/sims/doublewell-lattice-D-sde-50-down--5-1-TRUE.rds")
+## dw.Du <- readRDS("./data/sims/doublewell-lattice-D-sde-50-up-0-1-TRUE.rds")
 
-g <- readRDS("./data/networks.rds")[["drug"]]
+sis.Dd <- readRDS("./data/sims/SIS-lattice-D-sde-50-down-0-1-TRUE.rds")
+sis.Du <- readRDS("./data/sims/SIS-lattice-D-sde-50-up-0-1-TRUE.rds")
+
+g <- readRDS("./data/networks.rds")[["lattice"]]
 ## write_graph(g, "./img/drug.graphml", "graphml")
 
 colors <- list(
@@ -15,7 +20,7 @@ colors <- list(
     moran = 2,
     ssd = 3,
     skew = 4,
-    kurt = 5,
+    kurt = 8,
     xi = 9
 )
 
@@ -91,7 +96,7 @@ plotit <- function(sim, ...) {
 ht <- 10
 wd <- 9
 if(save_plots) {
-    pdf("./img/example-method.pdf", height = ht, width = wd)
+    pdf("./img/example-method-lattice-sis.pdf", height = ht, width = wd)
 } else {
     dev.new(height = ht, width = wd)
 }
@@ -100,7 +105,9 @@ par(mfrow = c(2, 1))
 ## plot(g, vertex.label = "", vertex.size = 5, vertex.color = 5, vertex.frame.color = NA,
 ##      edge.color = 8)
 
-plotit(dw.Du)
-plotit(dw.Dd)
+## plotit(dw.Du)
+## plotit(dw.Dd)
+plotit(sis.Du)
+plotit(sis.Dd)
 
 if(save_plots) dev.off()
