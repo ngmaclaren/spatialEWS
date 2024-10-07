@@ -96,7 +96,7 @@ result <- solve_in_range(rng, cparam, model, xinit, params, control, kind = "sde
 bifplot(result, rng, col = adjustcolor(1, 0.5), lwd = 0.5)
 ```
 
-Perhaps $u \in [0, 1.5]$ would be better, but $[0, 2]$ matches what we used for the manuscript. 
+Perhaps $u \in [0, 1.5]$ would be better, but $[0, 2]$ matches what we used for the manuscript (see "Simulation parameters.ods"). Note that this kind of procedure---proposing initial parameter values, checking with some diagnostic, then rerunning the simulations---will need to be done for each new network and for each simulation condition. For large networks, this procedure may be best done parallelizing across many cores, such as is possible on a high performance computing cluster. 
 
 To see the descending simulations, we update our parameters and re-run:
 ```R
@@ -110,6 +110,13 @@ As noted above, we provide `simulate-model.R` to perform these functions from th
 
 
 ## Computing early warning signals
+
+Moran's $I$ is defined as 
+\begin{equation} \label{eq:moranI}
+  I_{\rm M} = \frac{N}{W} \frac{\sum_{i=1}^N \sum_{j=1}^N A_{ij} (x_i - \overline{x}) (x_j - \overline{x})}{\sum_{i=1}^N (x_i - \overline{x})^2}
+\end{equation}
+
+There are several ways to compute skewness and kurtosis. We use the method based on central moments as implemented in the package [moments](https://cran.r-project.org/package=moments). The source code is available at that link: see `./R/skewness.R` and `./R/kurtosis.R` in the directory of that package. 
 
 Our implementation of computing Moran's I is in `calc-functions.R`. To compute early warning signals, produce a data matrix in which each column corresponds to a network node and each row corresponds to a control parameter value. Then, if such a matrix is called `X`,
 
