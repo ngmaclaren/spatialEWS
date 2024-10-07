@@ -151,7 +151,18 @@ This procedure computes one EWS value for each row of the matrix, corresponding 
 
 First, we define an $x_i$ value which will serve as the limit of an initial basin of attraction. For example, for our coupled double-well dynamics we use $(r_1,r_2,r_3)=(1,3,5)$. In the absence of noise, $r_2$ is an unstable fixed point: if $r_1 \leq x_i < r_2$ $x_i$ will move towards $r_1$ and $r_2 < x_i \leq r_3$ $x_i$ will move towards $r_3$. In the presence of noise and coupling, equilibrium values of $x_i^*$ will not be exactly equal to $r_1$ or $r_3$. However, we consider $x_i < r_2$ to be in the lower state and $x_i > r_2$ to be in the upper state. We define a global variable called `basins` in `./calc-functions.R` which stores the equivalent boundary values for each of our four dynamics. 
 
-Second, we define a function `get_idx()` which returns the row indices of a specially defined data frame which correspond to the values of the control parameter for which all $x_i$ are in their original state (i.e., are on the same side of the boundary value as their initial value). Our function `get_idx()` relies on several pieces of information which `simulate-model.R` stores alongside the simulation output, including the direction of the simulation sequence, which is relevant for deciding whether or not a an $x_i$ value is still in its original basin of attraction. 
+Second, we define a function `get_idx()` which returns the row indices of a specially defined data frame which correspond to the values of the control parameter for which all $x_i$ are in their original state (i.e., are on the same side of the boundary value as their initial value). Our function `get_idx()` relies on several pieces of information which `simulate-model.R` stores alongside the simulation output, including the direction of the simulation sequence, which is relevant for deciding whether or not a an $x_i$ value is still in its original basin of attraction. Because we allow for a list of several repetitions of a given simulation sequence, we also include a function `promote_df()` to handle the output of `simulate-model.R`. To compute EWSs for a single simulation sequence, follow these steps:
+
+```R
+## Assuming that `simresult` is the output of `simulate-model.R`
+## if using `result` from above in this README, define df <- result and skip the next two lines, continuing with moranI <- ...
+df <- promote_df(simresult)
+A <- attr(df, "params")$A # retrieve the adjacency matrix from the "promoted" df
+moranI <- apply(df, 1, global_moran, A = A)
+ssd <- apply(df, 1, sd)
+skew <- apply(df, 1, moments::skewness)
+kurt <- apply(df, 1, moments::kurtosis)
+```
 
 ## Evaluate early warning signals
 
