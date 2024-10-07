@@ -111,10 +111,7 @@ As noted above, we provide `simulate-model.R` to perform these functions from th
 
 ## Computing early warning signals
 
-Moran's $I$ is defined as 
-\begin{equation} \label{eq:moranI}
-  I_{\rm M} = \frac{N}{W} \frac{\sum_{i=1}^N \sum_{j=1}^N A_{ij} (x_i - \overline{x}) (x_j - \overline{x})}{\sum_{i=1}^N (x_i - \overline{x})^2}
-\end{equation}
+Moran's $I$ is defined as $ I_{\rm M} = \frac{N}{W} \frac{\sum_{i=1}^N \sum_{j=1}^N A_{ij} (x_i - \overline{x}) (x_j - \overline{x})}{\sum_{i=1}^N (x_i - \overline{x})^2}$
 
 There are several ways to compute skewness and kurtosis. We use the method based on central moments as implemented in the package [moments](https://cran.r-project.org/package=moments). The source code is available at that link: see `./R/skewness.R` and `./R/kurtosis.R` in the directory of that package. 
 
