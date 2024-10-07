@@ -112,19 +112,50 @@ As noted above, we provide `simulate-model.R` to perform these functions from th
 ## Computing early warning signals
 
 Moran's $I$ is defined as 
-$$I_{\rm M} = \frac{N}{W} \frac{\sum_{i=1}^N \sum_{j=1}^N A_{ij} (x_i - \overline{x}) (x_j - \overline{x})}{\sum_{i=1}^N (x_i - \overline{x})^2}$$
 
-There are several ways to compute skewness and kurtosis. We use the method based on central moments as implemented in the package [moments](https://cran.r-project.org/package=moments). The source code is available at that link: see `./R/skewness.R` and `./R/kurtosis.R` in the directory of that package. 
+$$I_{\rm M} = \frac{N}{W} \frac{\sum_{i=1}^N \sum_{j=1}^N A_{ij} (x_i - \overline{x}) (x_j - \overline{x})}{\sum_{i=1}^N (x_i - \overline{x})^2}$$.
 
-Our implementation of computing Moran's I is in `calc-functions.R`. To compute early warning signals, produce a data matrix in which each column corresponds to a network node and each row corresponds to a control parameter value. Then, if such a matrix is called `X`,
+Our implementation of Moran's I is called `global_moran()` and is in `./calc-functions.R`.
+
+We use the base R implementation of the sample standard deviation,
+
+$$s = \sqrt{\frac{1}{N-1} \sum_{i=1}^N (x_i - \overline{x})^2}$$.
+
+There are several ways to compute skewness and kurtosis---we use the method based on central moments. The $k$th central moment of a vector of values $\mathbold{x}$ is
+
+$$m_k = \frac{1}{N} \sum_{i=1}^N (x_i - \overline{x})^k$$.
+
+Skewness is based on the third central moment and is defined as
+
+$$g_1 = \frac{m_3}{m_2^{3/2}}$$.
+
+Because we investigate both ascending and descending simulations, for which the expected change in shape of the distribution is opposite (i.e., becoming more skewed as a control parameter increases and become less skewed as a control parameter decreases) we define $$g_1' \equiv g_1$$ for ascending simulations and $$g_1' \equiv -g_1$$ for descending simulations. 
+
+Kurtosis is defined as
+
+$$g_2 = \frac{m_4}{m_2^2}$$. 
+
+We use the implementations of skewness and kurtosis in the [moments](https://cran.r-project.org/package=moments) package. The source code is available at that link: see `./R/skewness.R` and `./R/kurtosis.R` in the directory of that package. 
+
+To compute early warning signals, produce a data matrix in which each column corresponds to a network node and each row corresponds to a control parameter value. Then, if such a matrix is called `result` (for example, the `result` we computed above),
 
 ```R
 source("calc-functions.R") # for global_moran()
-apply(X, 1, global_moran, A = A)
-apply(X, 1, sd)
-apply(X, 1, moments::skewness)
-apply(X, 1, moments::kurtosis)
+apply(result, 1, global_moran, A = A)
+apply(result, 1, sd)
+apply(result, 1, moments::skewness)
+apply(result, 1, moments::kurtosis)
 ```
+
+This procedure computes one EWS value for each row of the matrix, corresponding to one control parameter value. For this project we are only interested in EWS values before the first transition of any node. We defined a set of variables and functions to easily identify those values (see `./calc-functions.R`). 
+
+First, we define an $x_i$ value which will serve as the limit of an initial basin of attraction. For example, for our coupled double-well dynamics we use $(r_1,r_2,r_3)=(1,3,5)$. In the absence of noise, $r_2$ is an unstable fixed point: if $r_1 \leq x_i < r_2$ $x_i$ will move towards $r_1$ and $r_2 < x_i \leq r_3$ $x_i$ will move towards $r_3$. In the presence of noise and coupling, equilibrium values of $x_i^*$ will not be exactly equal to $r_1$ or $r_3$. However, we consider $x_i < r_2$ to be in the lower state and $x_i > r_2$ to be in the upper state. We define a global variable called `basins` in `./calc-functions.R` which stores the equivalent boundary values for each of our four dynamics. 
+
+Second, we define a function `get_idx()` which returns the row indices of a specially defined data frame which correspond to the values of the control parameter for which all $x_i$ are in their original state (i.e., are on the same side of the boundary value as their initial value). Our function `get_idx()` relies on several pieces of information which `simulate-model.R` stores alongside the simulation output, including the direction of the simulation sequence, which is relevant for deciding whether or not a an $x_i$ value is still in its original basin of attraction. 
+
+## Evaluate early warning signals
+
+Text about our classification algorithm here.
 
 ## Manuscript figures
 
@@ -134,6 +165,10 @@ Note that for copyright purposes we are not making all networks available in thi
 - Figure 4: `example-drug.R`
 - Figure 5: `example-drug.R`
 - Figure S1: `example-lattice.R`
-Create a subdirectory in your local clone called `./img/` before running those files. 
+Create a subdirectory in your local clone called `./img/` before running those files.
 
-Sims are now available in `./data/sims.tar`.
+To reproduce `./data/EWS-data.RData` itself (i.e., to recompute the EWS), extract `./data/sims.tar` to a directory called `./data/sims/` (there will be 360 simulation output `.rds` files) and run `./prepare-EWS-data.R`. 
+
+Finally, to re-run our classification results and produce the raw data for Figure 3 and the numeric results presented in the manuscript, section II B, see `./classification-results.R`.
+
+Note that both `./prepare-EWS-data.R` and `./classification-results.R` take several seconds to run. Additionally, `./prepare-EWS-data.R` saves the current R environment, whatever it is, as a side effect. We recommend that you run `./prepare-EWS-data.R` in a clean session.
