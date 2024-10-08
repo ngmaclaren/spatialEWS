@@ -1,6 +1,6 @@
 # spatialEWS
 
-This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303). The repository is a work in progress: please be patient.
+This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303).
 
 This README is divided into four parts. First, we demonstrate conducting ascending and descending sequences of simulations on a relatively small network. These simulations should be possible on a standard laptop; we tested these simulations on an x86 64-bit laptop with four Intel i3-5010U CPUs at 2.10GHz. In particular, we address finding reasonable parameters for a given network. Second, we show how we compute each of the four early warning signals (EWSs) on the data we produce in our simulations. Third, we show how to evaluate each EWS using Kendall's $\tau$ and our classification algorithm. Finally, we describe how to produce rough versions of the figures we included in the manuscript.
 
@@ -158,7 +158,7 @@ Second, we define a function `get_idx()` which returns the row indices of a spec
 df <- promote_df(simresult)
 A <- attr(df, "params")$A # retrieve the adjacency matrix from the "promoted" df
 
-## if using `result` from above in this README...
+## if using `result` from above in this README, need to add some attributes to satisfy calc-functions.R functions, which assume the output of simulate-model.R:
 attr(result, "direction") <- "down" # our most recent `result` started from xinit.high and made u more negative
 attr(result, "model") <- "doublewell"
 attr(result, "bparam.vals") <- rng
