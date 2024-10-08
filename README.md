@@ -187,7 +187,7 @@ For example,
 ```R
 n <- 5
 classification <- list(
-    moranI = classify(df, morani, n = n),
+    moranI = classify(df, moranI, n = n),
     ssd = classify(df, ssd, n = n),
     skew = classify(df, skew, n = n),
     kurt = classify(df, kurt, n = n)
