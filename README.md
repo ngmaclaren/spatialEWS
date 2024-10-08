@@ -22,7 +22,7 @@ We have produced a small R package called [`sdn`](https://github.com/ngmaclaren/
 We will rely on parallel processing and our sdn package for the remaining simulation steps.
 
 ```R
-library(parallel)
+library(parallel) # NB: we are testing on a Linux machine. If you are using Windows, you may need a different parallelization method.
 ncores <- detectCores() - 1
 library(sdn)
 ```
@@ -106,7 +106,7 @@ result <- solve_in_range(rng, cparam, model, xinit, params, control, kind = "sde
 bifplot(result, rng, col = adjustcolor(1, 0.5), lwd = 0.5)
 ```
 
-As noted above, we provide `simulate-model.R` to perform these functions from the command line. An example script which produces simulations for each of our ten simulation conditions for one network (the GKK network) is found in `add-gkk.sh`. For working on the cluster, please see `request-simulation.sh`, which schedules one simulation sequence to be run as one job, and `individual-request.sh` and `build-simulation-request.sh` which send one and many, respectively, simulation requests to the scheduler. 
+As noted above, we provide `simulate-model.R` to perform these functions from the command line. An example script which produces simulations for each of our ten simulation conditions for one network (the GKK network) is found in `add-gkk.sh`. For working on the cluster, please see `request-simulation.sh`, which schedules one simulation sequence to be run as one job, and `individual-request.sh` and `build-simulation-request.sh` which send one and many, respectively, simulation requests to the scheduler. Simulation output from `simulate-model.R` also includes several attributes assist in follow-on analyses, so using it in an interactive session can be useful.
 
 
 ## Computing early warning signals
@@ -154,10 +154,17 @@ First, we define an $x_i$ value which will serve as the limit of an initial basi
 Second, we define a function `get_idx()` which returns the row indices of a specially defined data frame which correspond to the values of the control parameter for which all $x_i$ are in their original state (i.e., are on the same side of the boundary value as their initial value). Our function `get_idx()` relies on several pieces of information which `simulate-model.R` stores alongside the simulation output, including the direction of the simulation sequence, which is relevant for deciding whether or not a an $x_i$ value is still in its original basin of attraction. Because we allow for a list of several repetitions of a given simulation sequence, we also include a function `promote_df()` to handle the output of `simulate-model.R`. To compute EWSs for a single simulation sequence, follow these steps:
 
 ```R
-## Assuming that `simresult` is the output of `simulate-model.R`
-## if using `result` from above in this README, define df <- result and skip the next two lines, continuing with moranI <- ...
+## Assuming that `simresult` is the output of `simulate-model.R`...
 df <- promote_df(simresult)
 A <- attr(df, "params")$A # retrieve the adjacency matrix from the "promoted" df
+
+## if using `result` from above in this README...
+attr(result, "direction") <- "down" # our most recent `result` started from xinit.high and made u more negative
+attr(result, "model") <- "doublewell"
+attr(result, "bparam.vals") <- rng
+df <- result
+
+## Continuing, same for both methods...
 moranI <- apply(df, 1, global_moran, A = A)
 ssd <- apply(df, 1, sd)
 skew <- apply(df, 1, moments::skewness)
