@@ -1,6 +1,6 @@
 # spatialEWS
 
-This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript should post next week (week of Oct 6). The repository is a work in progress: please be patient.
+This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303). The repository is a work in progress: please be patient.
 
 This README is divided into four parts. First, we demonstrate conducting ascending and descending sequences of simulations on a relatively small network. These simulations should be possible on a standard laptop; we tested these simulations on an x86 64-bit laptop with four Intel i3-5010U CPUs at 2.10GHz. In particular, we address finding reasonable parameters for a given network. Second, we show how we compute each of the four early warning signals (EWSs) on the data we produce in our simulations. Third, we show how to evaluate each EWS using Kendall's $\tau$ and our classification algorithm. Finally, we describe how to produce rough versions of the figures we included in the manuscript.
 
@@ -143,7 +143,7 @@ To compute early warning signals, produce a data matrix in which each column cor
 source("calc-functions.R") # for global_moran()
 apply(result, 1, global_moran, A = A)
 apply(result, 1, sd)
-apply(result, 1, moments::skewness)
+apply(result, 1, moments::skewness) # not sign-corrected; see below for an example of how to correct the sign
 apply(result, 1, moments::kurtosis)
 ```
 
@@ -161,12 +161,38 @@ A <- attr(df, "params")$A # retrieve the adjacency matrix from the "promoted" df
 moranI <- apply(df, 1, global_moran, A = A)
 ssd <- apply(df, 1, sd)
 skew <- apply(df, 1, moments::skewness)
+if(attr(df, "direction") == "down") skew <- -skew
 kurt <- apply(df, 1, moments::kurtosis)
 ```
 
 ## Evaluate early warning signals
 
-Text about our classification algorithm here.
+Given the object `df` above and the computed EWSs, computing Kendall's $\tau$ is relatively easy. We provide a function `get_tau()` in `calc-functions.R` which computes the $\tau$ values only for the latter half of the home range of the simulations.
+
+```R
+taus <- list(
+    moranI = get_tau(df, moranI, adjust.sign = TRUE),
+    ssd = get_tau(df, ssd, adjust.sign = TRUE),
+    skew = get_tau(df, skew, adjust.sign = TRUE),
+    kurt = get_tau(df, kurt, adjust.sign = TRUE)
+)
+```
+
+For our classification algorithm, we select a small number of observations far from the first bifurcation and a small number of observations near it. We provide functions to do these tasks in `calc-functions.R`: 
+- `get_samples()` returns the indices for the first $n$ control parameter values or the last $n$ before the transition, depending on arguments
+- `get_slope()` uses `get_samples()` and returns either just the slope of the EWS (with respect to the control parameter) at the far and near points, or the whole linear model as an object.
+- `classify()` uses the slopes returned by `get_slope()` and applies our decision rule, returning a character vector (length 1) with the result (accelerating, reversing, or unsuccessful).
+
+For example, 
+```R
+n <- 5
+classification <- list(
+    moranI = classify(df, morani, n = n),
+    ssd = classify(df, ssd, n = n),
+    skew = classify(df, skew, n = n),
+    kurt = classify(df, kurt, n = n)
+)
+```
 
 ## Manuscript figures
 
