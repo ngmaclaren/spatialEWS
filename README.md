@@ -1,6 +1,6 @@
 # spatialEWS
 
-This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303).
+This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303). Please cite this article when you use this code.
 
 This README is divided into four parts. First, we demonstrate conducting ascending and descending sequences of simulations on a relatively small network. These simulations should be possible on a standard laptop; we tested these simulations on an x86 64-bit laptop with four Intel i3-5010U CPUs at 2.10GHz. In particular, we address finding reasonable parameters for a given network. Second, we show how we compute each of the four early warning signals (EWSs) on the data we produce in our simulations. Third, we show how to evaluate each EWS using Kendall's $\tau$ and our classification algorithm. Finally, we describe how to produce rough versions of the figures we included in the manuscript.
 
