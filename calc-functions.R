@@ -9,6 +9,10 @@ global_moran <- function(x, A) {
     (N/W)*sum(A*outer(x, x))/sum(x^2)
 }
 
+CV <- function(x) {
+    sd(x)/mean(x)
+}
+
 ### Classify the EWS
 basins <- list( ## GLOBAL
     doublewell = 3, # separatrix
