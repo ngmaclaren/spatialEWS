@@ -50,14 +50,30 @@ plotit <- function(sim, ...) {
     )
 }
 
+get_classification <- function(sim, ...) {
+    df <- promote_df(sim)
+    skew <- apply(df, 1, moments::skewness)
+    if(attr(df, "direction") == "down") skew <- -skew
+    classify(df, skew, n = 5)
+}
+
 
 ht <- 10
 wd <- 10
 if(save_plots) {
     pdf("./img/lattice-g1.pdf", height = ht, width = wd)
+    ## png("./img/lattice-g1.png", height = ht, width = wd, units = "in", res = 300)
 } else {
     dev.new(height = ht, width = wd)
 }
 par(mfrow = c(4, 3))
-for(sim in sims) plotit(sim)
+for(i in seq_along(sims)) {
+    plotit(sims[[i]])
+    mtext(paste0("(", LETTERS[i], ")"), cex = 1.5, adj = 0.02)
+}
+plot(NULL, xlab = "", ylab = "", axes = FALSE, xlim = c(0, 1), ylim = rev(c(0, 11)), main = "Classification")
+text(
+    y = seq_along(sims), x = rep(0.5, length(sims)),
+    labels = sapply(seq_along(sims), function(i) paste0("(", LETTERS[i], ") ", get_classification(sims[[i]])))
+)
 if(save_plots) dev.off()
