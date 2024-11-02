@@ -6,12 +6,16 @@ results <- data.frame(
     result = c(
         mapply(classify, dfs, moranIs, n = n),
         mapply(classify, dfs, ssds, n = n),
+        mapply(classify, dfs, vars, n = n),
+        mapply(classify, dfs, cvs, n = n),
         mapply(classify, dfs, skews, n = n),
         mapply(classify, dfs, kurts, n = n)
     ),
     EWS = c(
         rep("moranI", length(dfs)),
         rep("ssd", length(dfs)),
+        rep("var", length(dfs)),
+        rep("cv", length(dfs)),
         rep("skew", length(dfs)),
         rep("kurt", length(dfs))
     ),
@@ -27,6 +31,10 @@ print("Moran's I")
 with(list(df = subset(results, EWS == "moranI")), table(df$dynamics, df$bparam, df$result, df$direction))
 print("Spatial standard deviation")
 with(list(df = subset(results, EWS == "ssd")), table(df$dynamics, df$bparam, df$result, df$direction))
+print("Variance (moment)")
+with(list(df = subset(results, EWS == "var")), table(df$dynamics, df$bparam, df$result, df$direction))
+print("Coefficient of variation")
+with(list(df = subset(results, EWS == "cv")), table(df$dynamics, df$bparam, df$result, df$direction))
 print("Spatial skew")
 with(list(df = subset(results, EWS == "skew")), table(df$dynamics, df$bparam, df$result, df$direction))
 print("Spatial kurtosis")
