@@ -63,7 +63,8 @@ rownames(ranks) <- seq(nrow(ranks))
 
 ranks$rank <- ranks$rank - 1
                                         # wins
-aggregate(rank ~ EWS, data = ranks, function(x) sum(x == 3))
+aggregate(rank ~ EWS, data = ranks, function(x) sum(x == 5))
+tapply(ranks, ~ EWS + dynamics + bparam + direction, FUN = function(x) max(x$rank, na.rm = TRUE))
                                         # total rank
 aggregate(rank ~ EWS, data = ranks, sum)
                                         # overall percent
