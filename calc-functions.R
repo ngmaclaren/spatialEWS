@@ -52,11 +52,14 @@ get_idx <- function(df, restrict = NULL) {
     if(is.null(restrict)) {
         return(idx)
     } else {
-                                        # restrict is the new "far", instead of 0.
-                                        # We'll still use 100 as the "close"
-        stopifnot(length(restrict) == 1)
-        far <- floor(quantile(idx, probs = restrict))
-        idx <- idx[far:length(idx)]
+                                        # pass a list of quantiles to restrict
+        stopifnot("far" %in% names(restrict) | "near" %in% names(restrict))
+        if("far" %in% names(restrict)) far <- restrict$far else far <- 0
+        if("near" %in% names(restrict)) near <- restrict$near else near <- 1
+        far <- floor(quantile(idx, probs = far))
+        near <- ceiling(quantile(idx, probs = near))
+        ## idx <- idx[far:length(idx)]
+        idx <- idx[far:near]
         return(idx)
     }
 }
@@ -70,8 +73,10 @@ get_samples <- function(df, which = c("near", "far"), n = 5, restrict = NULL) {
 
     switch(
         whichslope,
-        near = rev(seq(length(idx), by = -1, length.out = n)),
-        far = seq(1, by = 1, length.out = n)
+        ## near = rev(seq(length(idx), by = -1, length.out = n)),
+        near = rev(idx[seq(length(idx), by = -1, length.out = n)]),
+        ## far = seq(1, by = 1, length.out = n)
+        far = idx[1:n]
     )
 }
 
