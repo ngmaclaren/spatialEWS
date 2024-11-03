@@ -32,15 +32,15 @@ promote_df <- function(sim, which = 1) {
     df
 }
 
-                                        # This function returns the row indices of the relevant range.
-                                        # It implements a decision rule about states which says "I'm in my original
+                                        # This function returns the row indices of the simulation range.
+                                        # It implements a decision rule about states which says, "I'm in my original
                                         # state unless I am as or more extreme than a certain value."
-get_idx <- function(df) {
+get_idx <- function(df, restrict = NULL) {
     direction <- attr(df, "direction")
     dynamics <- attr(df, "model")
     basin <- basins[[dynamics]]
 
-    switch(
+    idx <- switch(
         direction,
                                         # These are correct: if the test is "as or more extreme than" then the
                                         # basin limit is the first value in the new regime. This idx is the indices
@@ -48,14 +48,25 @@ get_idx <- function(df) {
         down = which(apply(df, 1, min) > basin),
         up = which(apply(df, 1, max) < basin) 
     )
+
+    if(is.null(restrict)) {
+        return(idx)
+    } else {
+                                        # restrict is the new "far", instead of 0.
+                                        # We'll still use 100 as the "close"
+        stopifnot(length(restrict) == 1)
+        far <- floor(quantile(idx, probs = restrict))
+        idx <- idx[far:length(idx)]
+        return(idx)
+    }
 }
 
                                         # Returns the row indices of the first n (far) or last n (near) samples in
                                         # the relevant range.
-get_samples <- function(df, which = c("near", "far"), n = 3) {
+get_samples <- function(df, which = c("near", "far"), n = 5, restrict = NULL) {
     whichslope <- match.arg(which)
 
-    idx <- get_idx(df)
+    idx <- get_idx(df, restrict = restrict)
 
     switch(
         whichslope,
@@ -66,8 +77,8 @@ get_samples <- function(df, which = c("near", "far"), n = 3) {
 
                                         # returns the Kendall's tau between the control parameter and the EWS.
                                         # The EWS should be computed beforehand. If up, then τ, else τ' (= -τ).
-get_tau <- function(df, EWS, adjust.sign = FALSE) {
-    idx <- get_idx(df)
+get_tau <- function(df, EWS, adjust.sign = FALSE, restrict = NULL) {
+    idx <- get_idx(df, restrict = restrict)
     midpoint <- floor(median(idx))
     idx <- idx[which(idx > midpoint)]
 
@@ -88,10 +99,10 @@ get_tau <- function(df, EWS, adjust.sign = FALSE) {
                                         # Returns the simple slope for the first/last n data in the relevant range.
                                         # Independent: control parameter. Dependent: EWS. 
                                         # Optionally returns the whole model.
-get_slope <- function(df, EWS, which = c("near", "far"), n = 3, return.model = FALSE) {
+get_slope <- function(df, EWS, which = c("near", "far"), n = 5, return.model = FALSE, restrict = NULL) {
     whichslope <- match.arg(which, c("near", "far"))
 
-    samples <- get_samples(df, whichslope, n)
+    samples <- get_samples(df, which = whichslope, n = n, restrict = restrict)
 
     cparam <- attr(df, "bparam.vals")[samples]
     ews <- EWS[samples]
@@ -107,9 +118,9 @@ get_slope <- function(df, EWS, which = c("near", "far"), n = 3, return.model = F
                                         # Classifies an EWS as accelerating, reversing, or unsuccessful based on
                                         # the slope of the EWS vs. the control parameter and a threshold value
                                         # (default = 2). 
-classify <- function(df, EWS, threshold = 2, n = 5) {
-    firstslope <- get_slope(df, EWS, "far", n = n)
-    secondslope <- get_slope(df, EWS, "near", n = n)
+classify <- function(df, EWS, threshold = 2, n = 5, restrict = NULL) {
+    firstslope <- get_slope(df, EWS, "far", n = n, restrict = restrict)
+    secondslope <- get_slope(df, EWS, "near", n = n, restrict = restrict)
 
     firstsign <- sign(firstslope)
     secondsign <- sign(secondslope)
