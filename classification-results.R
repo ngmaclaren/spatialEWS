@@ -1,15 +1,22 @@
 load("./data/EWS-data.RData")
 
 remove_lattice <- TRUE
+restrict_idx <- TRUE
+
+if(restrict_idx) {
+    restrict <- list(far = 0.5)
+} else {
+    restrict <- NULL
+}
 
 results <- data.frame(
     result = c(
-        mapply(classify, dfs, moranIs, n = n),
-        mapply(classify, dfs, ssds, n = n),
-        mapply(classify, dfs, vars, n = n),
-        mapply(classify, dfs, cvs, n = n),
-        mapply(classify, dfs, skews, n = n),
-        mapply(classify, dfs, kurts, n = n)
+        mapply(classify, dfs, moranIs, MoreArgs = list(n = n, restrict = restrict)),
+        mapply(classify, dfs, ssds, MoreArgs = list(n = n, restrict = restrict)),
+        mapply(classify, dfs, vars, MoreArgs = list(n = n, restrict = restrict)),
+        mapply(classify, dfs, cvs, MoreArgs = list(n = n, restrict = restrict)),
+        mapply(classify, dfs, skews, MoreArgs = list(n = n, restrict = restrict)),
+        mapply(classify, dfs, kurts, MoreArgs = list(n = n, restrict = restrict))
     ),
     EWS = c(
         rep("moranI", length(dfs)),
