@@ -1,12 +1,12 @@
 # spatialEWS
 
-This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303).
+This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303). Please cite this article when you use this code.
 
-This README is divided into four parts. First, we demonstrate conducting ascending and descending sequences of simulations on a relatively small network. These simulations should be possible on a standard laptop; we tested these simulations on an x86 64-bit laptop with four Intel i3-5010U CPUs at 2.10GHz. In particular, we address finding reasonable parameters for a given network. Second, we show how we compute each of the four early warning signals (EWSs) on the data we produce in our simulations. Third, we show how to evaluate each EWS using Kendall's $\tau$ and our classification algorithm. Finally, we describe how to produce rough versions of the figures we included in the manuscript.
+This README is divided into four parts. First, we demonstrate conducting ascending and descending sequences of simulations on a relatively small network. These simulations should be possible on a standard laptop; we tested these simulations on an x86 64-bit laptop with four Intel i3-5010U CPUs at 2.10GHz. In particular, we address finding reasonable parameters for a given network. Second, we show how we compute each of the four "spatial" early warning signals (EWSs) on the data we produce in our simulations. Third, we show how to evaluate each EWS using Kendall's $\tau$ and our classification algorithm. Finally, we describe how to produce rough versions of the figures we included in the manuscript.
 
 ## Simulation sequences
 
-To demonstrate our simulation procedure, we use a Barab\'asi-Albert network with 100 nodes. We included this network in this repository, so we can access it easily. We will also need the adjacency matrix and the number of nodes readily available. Note that the steps below paraphrase from `simulate-model.R`, which is intended to conduct simulations as controlled by a shell script to support large simulations on a computing cluster. 
+To demonstrate our simulation procedure, we use a Barab\'asi-Albert network with 100 nodes. We included this network in this repository, so you can use it. We also need the adjacency matrix of the network and the number of nodes. Note that the steps below paraphrase from `simulate-model.R`, which is intended to conduct simulations as controlled by a shell script to support large simulations on a computing cluster. 
 
 ```R
 library(igraph)
@@ -27,7 +27,7 @@ ncores <- detectCores() - 1
 library(sdn)
 ```
 
-For demonstration purposes, we will use the coupled double-well dynamics (this dynamics is implemented in sdn). These dynamics are implemented as functions in the [deSolve](https://cran.r-project.org/package=deSolve) style for interoperability. Please see the sdn documentation.
+For demonstration purposes, here we use the coupled double-well dynamics. (This dynamics is implemented in sdn.) These dynamics are implemented as functions in the [deSolve](https://cran.r-project.org/package=deSolve) style for interoperability. Please see the sdn documentation.
 
 ```R
 model <- doublewell
@@ -50,7 +50,7 @@ params <- c(modelparams, list(A = A))
 control <- list(ncores = ncores, times = 0:50, deltaT = deltaT)
 ```
 
-Although the coupled double-well dynamics does not need it, we want to highlight that dynamics which involve a fixed point at zero (e.g., the SIS dynamics) need special consideration. We tell sdn to set any value below zero to zero through an argument in the control list:
+Although the coupled double-well dynamics does not need it, we want to highlight that dynamics which involve an equilibrium at zero (e.g., the SIS dynamics) need special consideration. We tell sdn to set any value below zero to zero through an argument in the control list:
 
 ```R
 if(args$model %in% c("SIS", "mutualistic", "genereg")) {
@@ -66,7 +66,7 @@ system.time(
 )
 ```
 
-which took 0.651 seconds on our machine. This `X` is in the output style of deSolve: the first column is the simulation time step and the remaining columns are the $x_i$ values for each node at that time step. Note that this `X` is for one particular control parameter value, namely $D=0.05$ and $u=0$:
+which took 0.651 seconds on our machine. This `X` is in the output style of deSolve: the first column is the simulation time step and the remaining columns are the $x_i$ values for each node at that time step. Note that this `X` is for one particular control parameter value, namely, $D=0.05$ and $u=0$:
 ```R
 params$u
 params$D
@@ -88,7 +88,7 @@ Let's look at what we produced using a diagnostic plot from sdn:
 bifplot(result, rng, col = adjustcolor(1, 0.5), lwd = 0.5)
 ```
 
-While it's nice to see the complete transition, for evaluating EWS in this manuscript we are only concerned with the control parameter range up to the first transition of any node. We can update our simulation to focus on this range, thus providing finer resolution near the bifurcation.
+While it's nice to see the complete transition, for evaluating EWSs in our manuscript, we are only concerned with the control parameter range up to the first transition of any node. We can update our simulation to focus on this range, thus providing finer resolution near the bifurcation.
 
 ```R
 rng <- seq(0, 2, length.out = lmax)
@@ -96,7 +96,7 @@ result <- solve_in_range(rng, cparam, model, xinit, params, control, kind = "sde
 bifplot(result, rng, col = adjustcolor(1, 0.5), lwd = 0.5)
 ```
 
-Perhaps $u \in [0, 1.5]$ would be better, but $[0, 2]$ matches what we used for the manuscript (see "Simulation parameters.ods"). Note that this kind of procedure---proposing initial parameter values, checking with some diagnostic, then rerunning the simulations---will need to be done for each new network and for each simulation condition. For large networks, this procedure may be best done parallelizing across many cores, such as is possible on a high performance computing cluster. 
+Perhaps $u \in [0, 1.5]$ would be better, but $[0, 2]$ matches what we used for the manuscript (see "Simulation parameters.ods", which is referred to from the Supplementary Materials of the manuscript). Note that this kind of procedure---proposing initial parameter values, checking with some diagnostic, then rerunning the simulations---will need to be done for each new network and for each simulation condition. For large networks, this procedure may be best done by parallelizing across many cores, probably with a high performance computing cluster. 
 
 To see the descending simulations, we update our parameters and re-run:
 ```R
@@ -106,7 +106,7 @@ result <- solve_in_range(rng, cparam, model, xinit, params, control, kind = "sde
 bifplot(result, rng, col = adjustcolor(1, 0.5), lwd = 0.5)
 ```
 
-As noted above, we provide `simulate-model.R` to perform these functions from the command line. An example script which produces simulations for each of our ten simulation conditions for one network (the GKK network) is found in `add-gkk.sh`. For working on the cluster, please see `request-simulation.sh`, which schedules one simulation sequence to be run as one job, and `individual-request.sh` and `build-simulation-request.sh` which send one and many, respectively, simulation requests to the scheduler. Simulation output from `simulate-model.R` also includes several attributes assist in follow-on analyses, so using it in an interactive session can be useful.
+As noted above, we provide `simulate-model.R` to perform these functions from the command line. An example script which produces simulations for each of our ten simulation conditions for one network (i.e., the so-called GKK network) is found in `add-gkk.sh`. For working on the cluster, please see `request-simulation.sh`, which schedules one simulation sequence to be run as one job, and `individual-request.sh` and `build-simulation-request.sh`, which send one and many, respectively, simulation requests to the scheduler. Simulation output from `simulate-model.R` also includes several attributes that assist in follow-on analyses, so using it in an interactive session can be useful.
 
 
 ## Computing early warning signals
@@ -115,7 +115,7 @@ Moran's $I$ is defined as
 
 $$I_{\rm M} = \frac{N}{W} \frac{\sum_{i=1}^N \sum_{j=1}^N A_{ij} (x_i - \overline{x}) (x_j - \overline{x})}{\sum_{i=1}^N (x_i - \overline{x})^2}$$.
 
-Our implementation of Moran's I is called `global_moran()` and is in `./calc-functions.R`.
+Our implementation of Moran's $I$ is called `global_moran()` and is in `./calc-functions.R`.
 
 We use the base R implementation of the sample standard deviation,
 
@@ -137,7 +137,7 @@ $$g_2 = \frac{m_4}{m_2^2}$$.
 
 We use the implementations of skewness and kurtosis in the [moments](https://cran.r-project.org/package=moments) package. The source code is available at that link: see `./R/skewness.R` and `./R/kurtosis.R` in the directory of that package. 
 
-To compute early warning signals, produce a data matrix in which each column corresponds to a network node and each row corresponds to a control parameter value. Then, if such a matrix is called `result` (for example, the `result` we computed above),
+To compute EWSs, produce a data matrix in which each column corresponds to a node of the network and each row corresponds to a control parameter value. Then, if such a matrix is called `result` (for example, the `result` we computed above), then we run
 
 ```R
 source("calc-functions.R") # for global_moran()
@@ -147,11 +147,11 @@ apply(result, 1, moments::skewness) # not sign-corrected; see below for an examp
 apply(result, 1, moments::kurtosis)
 ```
 
-This procedure computes one EWS value for each row of the matrix, corresponding to one control parameter value. For this project we are only interested in EWS values before the first transition of any node. We defined a set of variables and functions to easily identify those values (see `./calc-functions.R`). 
+This procedure computes one EWS value for each row of the matrix, corresponding to one control parameter value. In our manuscript, we were only interested in EWS values before the first transition of any node. We defined a set of variables and functions to easily identify those values (see `./calc-functions.R`). 
 
-First, we define an $x_i$ value which will serve as the limit of an initial basin of attraction. For example, for our coupled double-well dynamics we use $(r_1,r_2,r_3)=(1,3,5)$. In the absence of noise, $r_2$ is an unstable fixed point: if $r_1 \leq x_i < r_2$ $x_i$ will move towards $r_1$ and $r_2 < x_i \leq r_3$ $x_i$ will move towards $r_3$. In the presence of noise and coupling, equilibrium values of $x_i^*$ will not be exactly equal to $r_1$ or $r_3$. However, we consider $x_i < r_2$ to be in the lower state and $x_i > r_2$ to be in the upper state. We define a global variable called `basins` in `./calc-functions.R` which stores the equivalent boundary values for each of our four dynamics. 
+First, we define an $x_i$ value which will serve as the limit of an initial basin of attraction. For example, for our coupled double-well dynamics, we use $(r_1,r_2,r_3)=(1,3,5)$. In the absence of noise and coupling between nodes, $r_2$ is an unstable equilibrium. Specifically, if $r_1 \leq x_i < r_2$, then $x_i$ will move towards $r_1$. If $r_2 < x_i \leq r_3$, then $x_i$ will move towards $r_3$. In the presence of noise and coupling, equilibrium values of $x_i^*$ are not exactly equal to $r_1$ or $r_3$. However, we consider $x_i < r_2$ to be in the lower state and $x_i > r_2$ to be in the upper state. We define a global variable called `basins` in `./calc-functions.R` which stores the equivalent boundary values for each of the four dynamics models we used.
 
-Second, we define a function `get_idx()` which returns the row indices of a specially defined data frame which correspond to the values of the control parameter for which all $x_i$ are in their original state (i.e., are on the same side of the boundary value as their initial value). Our function `get_idx()` relies on several pieces of information which `simulate-model.R` stores alongside the simulation output, including the direction of the simulation sequence, which is relevant for deciding whether or not a an $x_i$ value is still in its original basin of attraction. Because we allow for a list of several repetitions of a given simulation sequence, we also include a function `promote_df()` to handle the output of `simulate-model.R`. To compute EWSs for a single simulation sequence, follow these steps:
+Second, we define a function `get_idx()` which returns the row indices of a specially defined data frame which correspond to the values of the control parameter for which all $x_i$ are in their original state (i.e., are on the same side of the boundary value as their initial value). Our function `get_idx()` relies on several pieces of information which `simulate-model.R` stores alongside the simulation output, including the direction of the simulation sequence, which is relevant for deciding whether or not an $x_i$ value is still in its original basin of attraction. Because we allow for a list of several repetitions of a given simulation sequence, we also include a function `promote_df()` to handle the output of `simulate-model.R`. To compute EWSs for a single simulation sequence, follow these steps:
 
 ```R
 ## Assuming that `simresult` is the output of `simulate-model.R`...
@@ -174,7 +174,7 @@ kurt <- apply(df, 1, moments::kurtosis)
 
 ## Evaluate early warning signals
 
-Given the object `df` above and the computed EWSs, computing Kendall's $\tau$ is relatively easy. We provide a function `get_tau()` in `calc-functions.R` which computes the $\tau$ values only for the latter half of the home range of the simulations.
+Given the object `df` above and the computed EWSs, computing Kendall's $\tau$ is relatively easy. We provide a function `get_tau()` in `calc-functions.R` which computes the $\tau$ values only for the latter half of the "home range" of the simulations. (See the manuscript for the definition of home range.)
 
 ```R
 taus <- list(
@@ -186,9 +186,9 @@ taus <- list(
 ```
 
 For our classification algorithm, we select a small number of observations far from the first bifurcation and a small number of observations near it. We provide functions to do these tasks in `calc-functions.R`: 
-- `get_samples()` returns the indices for the first $n$ control parameter values or the last $n$ before the transition, depending on arguments
+- `get_samples()` returns the indices for the first $n$ control parameter values or the last $n$ of them before the transition, depending on arguments.
 - `get_slope()` uses `get_samples()` and returns either just the slope of the EWS (with respect to the control parameter) at the far and near points, or the whole linear model as an object.
-- `classify()` uses the slopes returned by `get_slope()` and applies our decision rule, returning a character vector (length 1) with the result (accelerating, reversing, or unsuccessful).
+- `classify()` uses the slopes returned by `get_slope()` and applies our decision rule, returning a character vector (length 1) with the classification result (accelerating, reversing, or unsuccessful).
 
 For example, 
 ```R
@@ -203,7 +203,7 @@ classification <- list(
 
 ## Manuscript figures
 
-Note that for copyright purposes we are not making all networks available in this repository. ---the networks can be downloaded from their original sources or by contacting me. EWS data for making figures etc. is in `./data/EWS-data.RData`. This `.RData` file contains the computed early warning signals from each simulation. The files to produce raw version of manuscript figures 1, 2, 4, 5, and S1 are provided:
+For copyright purposes, we are not making all networks available in this repository. The networks can be downloaded from their original sources or by contacting me. EWS data for making figures etc. is in `./data/EWS-data.RData`. This `.RData` file contains the EWSs computed from each simulation. The files to produce a raw version of manuscript figures 1, 2, 4, 5, and S1 are provided:
 - Figure 1: `example-method.R`
 - Figure 2: `tauplot.R`
 - Figure 4: `example-drug.R`
@@ -213,6 +213,6 @@ Create a subdirectory in your local clone called `./img/` before running those f
 
 To reproduce `./data/EWS-data.RData` itself (i.e., to recompute the EWS), extract `./data/sims.tar` to a directory called `./data/sims/` (there will be 360 simulation output `.rds` files) and run `./prepare-EWS-data.R`. 
 
-Finally, to re-run our classification results and produce the raw data for Figure 3 and the numeric results presented in the manuscript, section II B, see `./classification-results.R`.
+Finally, to re-run our classification results and produce the raw data for Figure 3 and the numerical results presented in the manuscript, section II B, see `./classification-results.R`.
 
-Note that both `./prepare-EWS-data.R` and `./classification-results.R` take several seconds to run. Additionally, `./prepare-EWS-data.R` saves the current R environment, whatever it is, as a side effect. We recommend that you run `./prepare-EWS-data.R` in a clean session.
+Both `./prepare-EWS-data.R` and `./classification-results.R` take several seconds to run on our machine. Additionally, `./prepare-EWS-data.R` saves the current R environment, whatever it is, as a side effect. We recommend that you run `./prepare-EWS-data.R` in a clean session.
