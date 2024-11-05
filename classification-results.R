@@ -1,7 +1,7 @@
 load("./data/EWS-data.RData")
 
 remove_lattice <- TRUE
-restrict_idx <- TRUE
+restrict_idx <- TRUE # FALSE
 
 if(restrict_idx) {
     restrict <- list(far = 0.5)

@@ -7,7 +7,8 @@ investigate_lattice <- FALSE
 
 plotdata <- data.frame(
     tau.I = taus$moranI, # these are 'sign-adjusted'
-    tau.sd = taus$ssd,
+    ## tau.sd = taus$ssd,
+    tau.cv = taus$cv,
     tau.sk = taus$skew,
     tau.ku = taus$kurt,
     dynamics = dyns,
@@ -22,21 +23,21 @@ plotdata$cparam <- factor(plotdata$cparam)
 plotdata$direction <- factor(plotdata$direction)
 
 plotdata <- reshape(
-    plotdata, varying = c("tau.I", "tau.sd", "tau.sk", "tau.ku"),
-    v.names = "tau", timevar = "EWS", times = c("I", "s", "g1", "g2"),
+    plotdata, varying = c("tau.I", "tau.cv", "tau.sk", "tau.ku"), # , "tau.sd"
+    v.names = "tau", timevar = "EWS", times = c("I", "cv", "g1", "g2"), # , "s"
     direction = "long", new.row.names = 1:10000
 )
 
-plotdata$EWS <- factor(plotdata$EWS, levels = c("I", "s", "g1", "g2"))
+plotdata$EWS <- factor(plotdata$EWS, levels = c("I", "cv", "g1", "g2")) # , "s"
 find_adjust <- function(cparam, EWS) {
     cparam <- as.character(cparam)
     EWS <- as.character(EWS)
     if(cparam == "D") {
         ##switch(EWS, I = 0.45, s = 0.32, g1 = 0.19, g2 = 0.06)
-        switch(EWS, I = 0.39, s = 0.28, g1 = 0.17, g2 = 0.06)
+        switch(EWS, I = 0.39, cv = 0.28, g1 = 0.17, g2 = 0.06) # s
     } else if(cparam == "u") {
         ##switch(EWS, I = -0.06, s = -0.19, g1 = -0.32, g2 = -0.45)
-        switch(EWS, I = -0.06, s = -0.17, g1 = -0.28, g2 = -0.39)
+        switch(EWS, I = -0.06, cv = -0.17, g1 = -0.28, g2 = -0.39) # s
     }
 }
 plotdata$adjust <- mapply(find_adjust, plotdata$cparam, plotdata$EWS)
@@ -48,7 +49,8 @@ plotdata$col <- gsub(palette()[5], palette()[8], plotdata$col)
 if(investigate_lattice) {
     classifications <- data.frame(
         I = mapply(classify, dfs, moranIs, n = 5),
-        s = mapply(classify, dfs, ssds, n = 5),
+        ## s = mapply(classify, dfs, ssds, n = 5),
+        cv = mapply(classify, dfs, cvs, n = 5),
         g1 = mapply(classify, dfs, skews, n = 5),
         g2 = mapply(classify, dfs, kurts, n = 5),
         dynamics = dyns,

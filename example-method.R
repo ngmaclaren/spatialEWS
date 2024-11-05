@@ -13,7 +13,7 @@ g <- readRDS("./data/networks.rds")[["drug"]]
 colors <- list(
     base = 1,
     moran = 2,
-    ssd = 3,
+    cv = 3, #ssd = 3,
     skew = 4,
     kurt = 5,
     xi = 9
@@ -27,21 +27,21 @@ plotit <- function(sim, ...) {
     idx <- get_idx(df)
     
     moranI <- apply(df, 1, global_moran, A = A)[idx]
-    ssd <- apply(df, 1, sd)[idx]
+    cv <- apply(df, 1, CV)[idx] # ssd <- apply(df, 1, sd)[idx]
     skew <- apply(df, 1, moments::skewness)
     if(attr(df, "direction") == "down") skew <- -skew
     kurt <- apply(df, 1, moments::kurtosis)
 
     taus <- list(
         I_M = get_tau(df, moranI, TRUE),
-        ssd = get_tau(df, ssd, TRUE),
+        cv = get_tau(df, cv, TRUE), # ssd = get_tau(df, ssd, TRUE),
         skew = get_tau(df, skew, TRUE),
         kurt = get_tau(df, kurt, TRUE)
     )
     print(taus)
 
     print(classify(df, moranI, n = 5))
-    print(classify(df, ssd, n = 5))
+    print(classify(df, cv, n = 5)) # print(classify(df, ssd, n = 5))
     print(classify(df, skew, n = 5))
     print(classify(df, kurt, n = 5))
 
@@ -64,11 +64,11 @@ plotit <- function(sim, ...) {
     )
 
     par(new = TRUE)
-    plot(D[idx], ssd[idx], type = "l", xlim = range(D), lty = 1, lwd = lwd, col = colors$ssd,
+    plot(D[idx], cv[idx], type = "l", xlim = range(D), lty = 1, lwd = lwd, col = colors$cv, #ssd,
          xlab = "", ylab = "", axes = FALSE)
     eaxis(
-        4, cex.axis = 1.75, col = colors$ssd, line = pos, col.axis = colors$ssd,
-        small.args = list(col = colors$ssd, line = pos)
+        4, cex.axis = 1.75, col = colors$cv, line = pos, col.axis = colors$cv, # ssd
+        small.args = list(col = colors$cv, line = pos)
     )
 
     par(new = TRUE)

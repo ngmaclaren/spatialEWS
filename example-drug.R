@@ -12,7 +12,7 @@
 library(sfsmisc)
 library(sdn)
 source("calc-functions.R")
-save_plots <- FALSE # TRUE
+save_plots <- TRUE # FALSE
 palette("Okabe-Ito")
 
 plotit <- function(sim, col.xi = 9, col.ssd = 3, pad.ssd = NULL, labelsize = NULL, ...) {
@@ -54,6 +54,7 @@ plotit <- function(sim, col.xi = 9, col.ssd = 3, pad.ssd = NULL, labelsize = NUL
         xlab = "", ylab = "", axes = FALSE, cex.lab = 2,
         ...
     )
+    ##lines(bparam.vals, rowMeans(X), lty = 1, lwd = 4, col = 5)
     eaxis(1, cex.axis = 2)
     eaxis(2, cex.axis = 2)
     title(xlab = attr(sim, "bparam"), cex.lab = labelsize)
@@ -64,20 +65,24 @@ plotit <- function(sim, col.xi = 9, col.ssd = 3, pad.ssd = NULL, labelsize = NUL
     )
 
     sds <- apply(mark.X, 1, sd)
+    cvs <- apply(mark.X, 1, CV)
     skews <- apply(mark.X, 1, moments::skewness)
     if(attr(X, "direction") == "down") skews <- -skews
 
     allsd <- apply(X, 1, sd)
+    allcv <- apply(X, 1, CV)
     allskew <- apply(X, 1, moments::skewness)
     if(attr(X, "direction") == "down") allskew <- -allskew
-    mtext(tools::toTitleCase(classify(X, allsd, n = 5)), col = col.ssd, line = -1)
+    ## mtext(tools::toTitleCase(classify(X, allsd, n = 5)), col = col.ssd, line = -1)
+    mtext(tools::toTitleCase(classify(X, allcv, n = 5)), col = col.ssd, line = -1)
     mtext(tools::toTitleCase(classify(X, allskew, n = 5)), col = col.ssd+1, line = -3)
 
     
     cat("\n", paste(dynamics, direction, attr(X, "bparam")),
-        "\nControl parameter values:\n", mark.bpv,
-        "\nSpatial standard deviation:\n", sds,
-        "\nSpatial skewness:\n", skews,
+        "\nControl parameter values:\n", round(mark.bpv, 3),
+        ##"\nSpatial standard deviation:\n", round(sds, 3),
+        "\nCoefficient of variation:\n", round(cvs, 3),
+        "\nSpatial skewness:\n", round(skews, 3),
         "\n"
         )
 }
