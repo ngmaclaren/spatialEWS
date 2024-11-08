@@ -1,6 +1,6 @@
 load("./data/EWS-data.RData")
 
-investigate_lattice <- FALSE
+remove_lattice <- TRUE # FALSE
 
 tdat <- data.frame(
     tau.I = taus$moranI, # these are 'sign-adjusted'
@@ -25,6 +25,8 @@ tdat <- reshape(
     v.names = "tau", timevar = "EWS", times = c("I", "ssd", "var", "cv", "g1", "g2"), # , "s"
     direction = "long", new.row.names = 1:10000
 )
+
+if(remove_lattice) tdat <- subset(tdat, network != "lattice")
 
 agg <- aggregate(tau ~ dynamics + cparam + direction + EWS, data = tdat, FUN = mean)
 reshape(agg, timevar = "EWS", idvar = c("dynamics", "cparam", "direction"), direction = "wide")
