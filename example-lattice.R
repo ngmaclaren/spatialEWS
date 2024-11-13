@@ -18,7 +18,8 @@ g <- readRDS("./data/networks.rds")[["lattice"]]
 colors <- list(
     base = 1,
     moran = 2,
-    ssd = 3,
+    ## ssd = 3,
+    CV = 3,
     skew = 4,
     kurt = 8,
     xi = 9
@@ -32,21 +33,24 @@ plotit <- function(sim, ...) {
     idx <- get_idx(df)
     
     moranI <- apply(df, 1, global_moran, A = A)[idx]
-    ssd <- apply(df, 1, sd)[idx]
+    ## ssd <- apply(df, 1, sd)[idx]
+    CV <- apply(df, 1, CV)[idx]
     skew <- apply(df, 1, moments::skewness)
     if(attr(df, "direction") == "down") skew <- -skew
     kurt <- apply(df, 1, moments::kurtosis)
 
     taus <- list(
         I_M = get_tau(df, moranI, TRUE),
-        ssd = get_tau(df, ssd, TRUE),
+        ## ssd = get_tau(df, ssd, TRUE),
+        CV = get_tau(df, CV, TRUE),
         skew = get_tau(df, skew, TRUE),
         kurt = get_tau(df, kurt, TRUE)
     )
     print(taus)
 
     print(classify(df, moranI, n = 5))
-    print(classify(df, ssd, n = 5))
+    ## print(classify(df, ssd, n = 5))
+    print(classify(df, CV, n = 5))
     print(classify(df, skew, n = 5))
     print(classify(df, kurt, n = 5))
 
@@ -69,11 +73,11 @@ plotit <- function(sim, ...) {
     )
 
     par(new = TRUE)
-    plot(D[idx], ssd[idx], type = "l", xlim = range(D), lty = 1, lwd = lwd, col = colors$ssd,
+    plot(D[idx], CV[idx], type = "l", xlim = range(D), lty = 1, lwd = lwd, col = colors$CV,
          xlab = "", ylab = "", axes = FALSE)
     eaxis(
-        4, cex.axis = 1.75, col = colors$ssd, line = pos, col.axis = colors$ssd,
-        small.args = list(col = colors$ssd, line = pos)
+        4, cex.axis = 1.75, col = colors$CV, line = pos, col.axis = colors$CV,
+        small.args = list(col = colors$CV, line = pos)
     )
 
     par(new = TRUE)

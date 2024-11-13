@@ -3,7 +3,7 @@ load("./data/EWS-data.RData")
 library(sfsmisc)
 palette("Okabe-Ito")
 
-investigate_lattice <- FALSE
+investigate_lattice <- TRUE # FALSE
 
 plotdata <- data.frame(
     tau.I = taus$moranI, # these are 'sign-adjusted'
@@ -49,7 +49,8 @@ plotdata$col <- gsub(palette()[5], palette()[8], plotdata$col)
 if(investigate_lattice) {
     classifications <- data.frame(
         I = mapply(classify, dfs, moranIs, n = 5),
-        ## s = mapply(classify, dfs, ssds, n = 5),
+        s = mapply(classify, dfs, ssds, n = 5),
+        m2 = mapply(classify, dfs, vars, n = 5),
         cv = mapply(classify, dfs, cvs, n = 5),
         g1 = mapply(classify, dfs, skews, n = 5),
         g2 = mapply(classify, dfs, kurts, n = 5),
@@ -59,7 +60,7 @@ if(investigate_lattice) {
         direction = directions
     )
     rownames(classifications) <- seq_len(nrow(classifications))
-    subset(classifications, network == "lattice")
+    print(subset(classifications, network == "lattice"))
 
     plotdata$col[plotdata$network != "lattice"] <- gsub("FF", "00", plotdata$col[plotdata$network != "lattice"])
 } else {
@@ -120,10 +121,10 @@ if(save_plots) dev.off()
                                         # reshape classifications
 classified <- reshape(
     classifications,
-    varying = c("I", "s", "g1", "g2"),
+    varying = c("I", "s", "m2", "cv", "g1", "g2"),
     v.names = "class",
     timevar = "EWS",
-    times = c("I", "s", "g1", "g2"),
+    times = c("I", "s", "m2", "cv", "g1", "g2"),
     direction = "long"
 )
 rownames(classified) <- seq(nrow(classified))
@@ -131,7 +132,8 @@ colnames(classified)[which(colnames(classified) == "bparam")] <- "cparam"
 
 df <- merge(plotdata, classified, by = c("dynamics", "network", "cparam", "direction", "EWS"))
 df <- df[, !grepl("id.", colnames(df))]
-rdf <- subset(df, EWS %in% c("I", "s"))
+##rdf <- subset(df, EWS %in% c("I", "s"))
+rdf <- subset(df, EWS %in% c("cv", "g1"))
 rdf$mainclass <- ifelse(rdf$class == "unsuccessful", "unsuccessful", "successful")
 
 tauagg <- aggregate(tau ~ network + EWS + mainclass, data = rdf, FUN = mean)
@@ -142,12 +144,22 @@ subset(tauagg, network == "lattice")
 ## 55  lattice   s   successful 0.6876040
 ## 90  lattice   I unsuccessful 0.2056556
 ## 125 lattice   s unsuccessful 0.1370968
+##     network EWS    mainclass         tau
+## 21  lattice  cv   successful  0.79333640
+## 57  lattice  g1   successful -0.25474091
+## 92  lattice  cv unsuccessful -0.06399462
+## 126 lattice  g1 unsuccessful  0.01267428
 aggregate(tau ~ EWS + mainclass, data = subset(tauagg, network != "lattice"), FUN = mean)
 ##   EWS    mainclass         tau
 ## 1   I   successful  0.85730952
 ## 2   s   successful  0.86373746
 ## 3   I unsuccessful -0.04010949
 ## 4   s unsuccessful -0.65842740
+##   EWS    mainclass           tau
+## 1  cv   successful  0.7336792514
+## 2  g1   successful  0.8684222434
+## 3  cv unsuccessful -0.1359847848
+## 4  g1 unsuccessful -0.0009560014
 
 any(subset(rdf, network == "lattice" & mainclass == "successful")$tau < 0) # FALSE
 any(subset(rdf, network != "lattice" & mainclass == "successful")$tau < 0) # TRUE
