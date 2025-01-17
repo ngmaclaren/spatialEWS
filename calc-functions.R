@@ -42,9 +42,6 @@ get_idx <- function(df, restrict = NULL) {
 
     idx <- switch(
         direction,
-                                        # These are correct: if the test is "as or more extreme than" then the
-                                        # basin limit is the first value in the new regime. This idx is the indices
-                                        # of all cparam vals in the orignial regime. 
         down = which(apply(df, 1, min) > basin),
         up = which(apply(df, 1, max) < basin) 
     )
@@ -149,5 +146,99 @@ classify <- function(df, EWS, threshold = 2, n = 5, restrict = NULL) {
         } else {
             return("unsuccessful")
         }
+    }
+}
+
+
+### modifications of get_tau() and classify() to work with x = t instead x = cparam
+
+get_idx_time <- function(X, mintime = 5) { # must set a mintime to discard transients
+    idx <- switch(
+        direction,
+        down = which(apply(X, 1, min) > basin & X[, "time"] >= mintime),
+        up = which(apply(X, 1, max) < basin &  X[, "time"] >= mintime)
+    )
+
+    deltaT <- attr(X, "deltaT")
+    idx <- idx[seq(1, length(idx), by = 1/deltaT)]#(1/deltaT)/10)]
+
+    return(idx)
+}
+
+get_samples_time <- function(X, which = c("near", "far"), n = 5, mintime = 5) {
+    whichslope <- match.arg(which)
+
+    idx <- get_idx_time(X, mintime = mintime)
+
+    switch(
+        whichslope,
+        near = rev(idx[seq(length(idx), by = -1, length.out = n)]),
+        far = idx[seq(1, by = 1, length.out = n)]
+    )
+}
+
+get_tau_time <- function(X, EWS, mintime = 5) { # no adjusting sign because t always grows and EWS should also grow
+    idx <- get_idx_time(X, mintime = mintime)
+
+    times <- X[idx, "time"]
+    ews <- EWS[idx]
+
+    tau <- cor(times, ews, method = "kendall")
+    return(tau)
+}
+
+get_slope_time <- function(X, EWS, which = c("near", "far"), n = 5, mintime = 5, return.model = FALSE) {
+    whichslope <- match.arg(which, c("near", "far"))
+
+    samples <- get_samples_time(X, which = whichslope, n = n, mintime = mintime)
+
+    times <- X[samples, "time"]
+    ews <- EWS[samples]
+    m <- lm(ews ~ times)
+
+    if(return.model) {
+        return(m)
+    } else {
+        return(as.numeric(coef(m)[2]))
+    }
+}
+
+classify_time <- function(X, EWS, threshold = 2, n = 5, mintime = 5) {
+    firstslope <- get_slope_time(X, EWS, "far", n = n, mintime = mintime)
+    secondslope <- get_slope_time(X, EWS, "near", n = n, mintime = mintime)
+
+    firstsign <- sign(firstslope)
+    secondsign <- sign(secondslope)
+    ratio <- secondslope/firstslope
+
+    ## no sense of direction here
+    ## direction <- attr(X, "direction")
+
+    ## if(direction == "up") {
+    if(sign(firstslope) > 0 & sign(secondslope) > 0 & abs(ratio) > threshold) {
+        return("accelerating")
+    } else if(sign(firstslope) < 0 & sign(secondslope) > 0 & abs(ratio) > 0.5*threshold) {
+        return("reversing")
+    } else {
+        return("unsuccessful")
+    }
+    ## } else { # down
+    ##     if(sign(firstslope) < 0 & sign(secondslope) < 0 & abs(ratio) > threshold) {
+    ##         return("accelerating")
+    ##     } else if(sign(firstslope) > 0 & sign(secondslope) < 0 & abs(ratio) > 0.5*threshold) {
+    ##         return("reversing")
+    ##     } else {
+    ##         return("unsuccessful")
+    ##     }
+    ## }
+}
+
+## helper function to properly capitalize Unsuccessful etc., working from toupper
+tosentence <- function(x) {
+    if(length(x) > 1) stop("Not currently vectorized.")
+    if(nchar(x) == 1) {
+        toupper(x)
+    } else {
+        paste0(toupper(substr(x, 1, 1)), tolower(substr(x, 2, nchar(x))))
     }
 }
