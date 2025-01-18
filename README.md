@@ -1,19 +1,19 @@
 # spatialEWS
 
-This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303). Please cite this article when you use this code.
+This repository contains code and data in support of our manuscript, "Applicability of spatial early warning signals to complex network dynamics." The arXiv version of our manuscript is available [here](https://arxiv.org/abs/2410.04303). Please cite this article if you use this code.
 
 This README is divided into four parts. First, we demonstrate conducting ascending and descending sequences of simulations on a relatively small network. These simulations should be possible on a standard laptop; we tested these simulations on an x86 64-bit laptop with four Intel i3-5010U CPUs at 2.10GHz. In particular, we address finding reasonable parameters for a given network. Second, we show how we compute each of the four "spatial" early warning signals (EWSs) on the data we produce in our simulations. Third, we show how to evaluate each EWS using Kendall's $\tau$ and our classification algorithm. Finally, we describe how to produce rough versions of the figures we included in the manuscript.
 
 ## Simulation sequences
 
-To demonstrate our simulation procedure, we use a Barab\'asi-Albert network with 100 nodes. We included this network in this repository, so you can use it. We also need the adjacency matrix of the network and the number of nodes. Note that the steps below paraphrase from `simulate-model.R`, which is intended to conduct simulations as controlled by a shell script to support large simulations on a computing cluster. 
+To demonstrate our simulation procedure, we use a Barabási-Albert network with 100 nodes. We included this network in this repository; it is in a list of networks stored in `./data/modelnetworks.rds`. We also need the adjacency list of the network and the number of nodes. Note that the steps below paraphrase from `simulate-model.R`, which is intended to conduct simulations as controlled by a shell script to support large simulations on a computing cluster. 
 
 ```R
 library(igraph)
 
 modelnetworks <- readRDS("./data/modelnetworks.rds")
 g <- modelnetworks$barabasialbert
-A <- as_adj(g, "both", sparse = FALSE)
+AL <- as_adj_list(g, "all")
 N <- vcount(g)
 ```
 
@@ -30,8 +30,9 @@ library(sdn)
 For demonstration purposes, here we use the coupled double-well dynamics. (This dynamics is implemented in sdn.) These dynamics are implemented as functions in the [deSolve](https://cran.r-project.org/package=deSolve) style for interoperability. Please see the sdn documentation.
 
 ```R
-model <- doublewell
-modelparams <- .doublewell
+modelname <- "doublewell" # we'll want this name below
+model <- get(modelname)
+modelparams <- get(paste0(".", modelname))
 ```
 
 Initially, we will use the global stress parameter $u$ as the control parameter and conduct ascending simulations. We will also start with some initial guesses at parameter values. 
@@ -46,14 +47,16 @@ xinit <- rep(modelparams$xinit.low, N)
 ## for conducting simulations with sdn:
 deltaT <- 0.01
 simtime <- 50 # 50 user time units
-params <- c(modelparams, list(A = A))
+params <- c(modelparams, list(AL = AL))
 control <- list(ncores = ncores, times = 0:50, deltaT = deltaT)
 ```
+
+Note that we use the adjacency list method here, which is scalable to larger networks. For relatively small networks, such as those used in this study, the adjacency matrix method runs in acceptable time. The file `simulate-model.R` uses the adjacency matrix method.
 
 Although the coupled double-well dynamics does not need it, we want to highlight that dynamics which involve an equilibrium at zero (e.g., the SIS dynamics) need special consideration. We tell sdn to set any value below zero to zero through an argument in the control list:
 
 ```R
-if(args$model %in% c("SIS", "mutualistic", "genereg")) {
+if(modelname %in% c("SIS", "mutualistic", "genereg")) {
     control$absorbing.state <- list(value = 0, which = "floor")
 }
 ```
@@ -61,12 +64,13 @@ if(args$model %in% c("SIS", "mutualistic", "genereg")) {
 Now, we can run a test simulation like this
 
 ```R
+set.seed(123)
 system.time(
     X <- sde(xinit, control$times, model, params, control)
 )
 ```
 
-which took 0.651 seconds on our machine. This `X` is in the output style of deSolve: the first column is the simulation time step and the remaining columns are the $x_i$ values for each node at that time step. Note that this `X` is for one particular control parameter value, namely, $D=0.05$ and $u=0$:
+which took about 1.5 seconds on our machine. This `X` is in the output style of deSolve: the first column is the simulation time step and the remaining columns are the $x_i$ values for each node at that time step. Note that this `X` is for one particular combination of control parameter values, namely, $D=0.05$ and $u=0$:
 ```R
 params$u
 params$D
@@ -75,12 +79,13 @@ params$D
 To simulate across our parameter range, we use sdn's `solve_in_range()`:
 
 ```R
+set.seed(123)
 system.time(
     result <- solve_in_range(rng, cparam, model, xinit, params, control, kind = "sde")
 )
 ```
 
-That ran in 29.7 seconds on our machine. 
+That ran in about 77 seconds on our machine. 
 
 Let's look at what we produced using a diagnostic plot from sdn:
 
@@ -121,6 +126,8 @@ We use the base R implementation of the sample standard deviation,
 
 $$s = \sqrt{\frac{1}{N-1} \sum_{i=1}^N (x_i - \overline{x})^2}$$.
 
+The coefficient of variation (CV) is the sample standard deviation divided by the sample mean.
+
 There are several ways to compute skewness and kurtosis---we use the method based on central moments. The $k$th central moment of a vector of values $\mathbold{x}$ is
 
 $$m_k = \frac{1}{N} \sum_{i=1}^N (x_i - \overline{x})^k$$.
@@ -141,6 +148,7 @@ To compute EWSs, produce a data matrix in which each column corresponds to a nod
 
 ```R
 source("calc-functions.R") # for global_moran()
+A <- as_adjacency_matrix(g, "both", sparse = FALSE)
 apply(result, 1, global_moran, A = A)
 apply(result, 1, sd)
 apply(result, 1, moments::skewness) # not sign-corrected; see below for an example of how to correct the sign
@@ -203,13 +211,16 @@ classification <- list(
 
 ## Manuscript figures
 
-For copyright purposes, we are not making all networks available in this repository. The networks can be downloaded from their original sources or by contacting me. EWS data for making figures etc. is in `./data/EWS-data.RData`. This `.RData` file contains the EWSs computed from each simulation. The files to produce a raw version of manuscript figures 1, 2, 4, 5, and S1 are provided:
-- Figure 1: `example-method.R`
-- Figure 2: `tauplot.R`
-- Figure 4: `example-drug.R`
+For copyright purposes, we are not making all networks available in this repository. The networks can be downloaded from their original sources or by contacting me. EWS data for making figures etc. is in `./data/EWS-data.RData`. This `.RData` file contains the EWSs computed from each simulation. We included the files used to produce raw versions of the following manuscript figures:
+- Figure 2: `example-method.R`
+- Figure 3: `tauplot.R`
 - Figure 5: `example-drug.R`
-- Figure S1: `example-lattice.R`
-Create a subdirectory in your local clone called `./img/` before running those files.
+- Figure 6: `example-drug.R`
+- Figure S3: `lattice-g1.R`
+- Figure S4: `example-method.R`
+- Figure S5: `stochastic-forcing.R`
+- Figure S6: `impulse.R`
+Create a subdirectory in your local clone called `./img/` before running those files. 
 
 To reproduce `./data/EWS-data.RData` itself (i.e., to recompute the EWS), extract `./data/sims.tar` to a directory called `./data/sims/` (there will be 360 simulation output `.rds` files) and run `./prepare-EWS-data.R`. 
 

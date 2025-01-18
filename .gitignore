@@ -8,6 +8,7 @@ fromUBcluster-spatialEWS.txt
 data/networks.rds
 data/nets-for-git.R
 data/add-gkk.R
+data/simulation-parameters.csv
 
 # Directories
 docs/
