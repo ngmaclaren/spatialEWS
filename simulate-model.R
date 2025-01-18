@@ -86,7 +86,7 @@ print(filetag)#; q(save = "no") # for debugging
 
 ## g <- get(args$network)
 g <- networks[[args$network]]
-A <- as_adj(g, "both", sparse = FALSE)
+A <- as_adjacency_matrix(g, "both", sparse = FALSE)
 N <- vcount(g)
 
 model <- get(args$model)
@@ -107,7 +107,6 @@ if(args$sim_defaults) {
     )
     deltaT <- sparams$deltaT
     if(args$bparam == "u") args$Dinit <- sparams$D
-    ##rng <- seq(rng.far, rng.near, length.out = lmax)
     if(args$bparam == "D") {
         modelparams$Ds <- seq(sparams$rng.far, sparams$rng.near, length.out = lmax)
     } else {
@@ -120,7 +119,6 @@ if(args$sim_defaults) {
                                         # Select that value, then assign it to every node.
 
 if(is.finite(args$xinit)) {
-    ## xinit <- rep(args$xinit, N)
     xinit <- args$xinit
 } else {
     xinit <- switch(args$direction, up = modelparams$xinit.low, down = modelparams$xinit.high)
@@ -132,6 +130,7 @@ if(is.finite(args$uinit)) modelparams$u <- args$uinit
 if(is.finite(args$Dinit)) modelparams$D <- args$Dinit
 
 params <- c(modelparams, list(A = A))
+params$use.matrix <- TRUE            
 control <- list(ncores = ncores, times = 0:args$simtime, deltaT = deltaT)
 if(args$model %in% c("SIS", "mutualistic", "genereg")) {
     control$absorbing.state <- list(value = 0, which = "floor")
@@ -146,7 +145,7 @@ rng <- switch(
                                         # Debugging
 if(interactive()) { # system.time() won't print to stdout like this---run each line individually, or paste somewhere else
     ## system.time(X <- sde(xinit, control$times, model, params, control))
-    system.time(result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind))
+    ## system.time(result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind))
     ## rowMeans(result)
     result <- solve_in_range(rng, args$bparam, model, xinit, params, control, kind = args$simkind)
     ## pdf(paste0(filetag, "-bifplot.pdf"))
