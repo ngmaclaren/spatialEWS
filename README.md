@@ -128,7 +128,7 @@ $$s = \sqrt{\frac{1}{N-1} \sum_{i=1}^N (x_i - \overline{x})^2}$$.
 
 The coefficient of variation (CV) is the sample standard deviation divided by the sample mean.
 
-There are several ways to compute skewness and kurtosis---we use the method based on central moments. The $k$th central moment of a vector of values $\mathbold{x}$ is
+There are several ways to compute skewness and kurtosis---we use the method based on central moments. The $k$th central moment of a vector of values $\mathbf{x}$ is
 
 $$m_k = \frac{1}{N} \sum_{i=1}^N (x_i - \overline{x})^k$$.
 
